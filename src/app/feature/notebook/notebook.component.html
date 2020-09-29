@@ -1,0 +1,46 @@
+<div class="uk-section uk-section-primary">
+    <div class="uk-container">
+        <h3>Mi Cuaderno</h3>
+        <ul class="task-list uk-list uk-list-divider">
+            <li *ngFor="let task of tasks">{{ task.description }}</li>
+        </ul>
+        <form
+            *ngFor="let control of newTaskFormArray.controls; let i=index"
+            class="new-task-form"
+            [formGroup]="$any(newTaskFormArray)"
+        >
+            <div class="uk-margin" uk-margin>
+                <input
+                    type="text"
+                    class="uk-input uk-form-width-large"
+                    [formControlName]="i"
+                    (keyup.enter)="saveTask(control.value)"
+                    spellcheck="false"
+                    #newTaskInput
+                > {{newTaskInput.focus()}}
+                <button
+                    class="uk-button uk-button-default"
+                    type="button"
+                    (click)="saveTask(control.value)"
+                >
+                    <span uk-icon="icon:  check"></span>
+                </button>
+                <button
+                    class="dismiss-new-task-button uk-button uk-button-default"
+                    type="button"
+                    (click)="clearTaskChanges()"
+                >
+                    <span uk-icon="icon:  close"></span>
+                </button>
+            </div>
+        </form>
+        <div class="uk-flex uk-flex-around">
+            <button
+                class="uk-button uk-button-default"
+                (click)="promptForNewTask()"
+            >
+                Añadir tarea
+            </button>
+        </div>
+    </div>
+</div>

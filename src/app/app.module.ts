@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { NotebookModule } from './feature/notebook/notebook.module';
 
 @NgModule({
   declarations: [
