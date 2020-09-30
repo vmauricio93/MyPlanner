@@ -3,5 +3,6 @@ export interface Task {
     date?: Date;
     time?: Date;
     place?: string;
-    tag?: string;    
+    tag?: string;
+    done: boolean;    
 }

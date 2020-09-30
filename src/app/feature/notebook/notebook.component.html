@@ -2,7 +2,19 @@
     <div class="uk-container">
         <h3>Mi Cuaderno</h3>
         <ul class="task-list uk-list uk-list-divider">
-            <li *ngFor="let task of tasks">{{ task.description }}</li>
+            <li *ngFor="let task of tasks" class="uk-flex uk-flex-between">
+                <span
+                    class="task"
+                    [ngClass]="{'task-done': task.done}"
+                    (click)="toggleTaskAsDone(task)"
+                >{{ task.description }}</span>
+                <button
+                    class="uk-button uk-button-text"
+                    (click)="showDeleteModalForTask(task)"
+                >
+                    <span uk-icon="icon:  trash"></span>
+                </button>
+            </li>
         </ul>
         <form
             *ngFor="let control of newTaskFormArray.controls; let i=index"
@@ -15,9 +27,10 @@
                     class="uk-input uk-form-width-large"
                     [formControlName]="i"
                     (keyup.enter)="saveTask(control.value)"
+                    (keyup.esc)="clearTaskChanges()"
                     spellcheck="false"
                     #newTaskInput
-                > {{newTaskInput.focus()}}
+                > {{ newTaskInput.focus() }}
                 <button
                     class="uk-button uk-button-default"
                     type="button"
