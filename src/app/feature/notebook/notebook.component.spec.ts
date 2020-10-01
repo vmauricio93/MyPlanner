@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { TaskService } from 'src/app/core/task.service';
+import { UiKitService } from 'src/app/core/ui-kit.service';
 import { Task } from 'src/app/shared/task';
 
 import { NotebookComponent } from './notebook.component';
@@ -18,10 +19,8 @@ describe('NotebookComponent', () => {
       declarations: [ NotebookComponent ],
       imports: [ ReactiveFormsModule ],
       providers: [
-        {
-          provide: TaskService,
-          useValue: { getTasks: () => of([]) }
-        }
+        { provide: TaskService, useClass: TaskServiceMock },
+        { provide: UiKitService, useClass: UiKitServiceMock }
       ]
     })
     .compileComponents();
@@ -126,6 +125,14 @@ describe('NotebookComponent', () => {
 
     expect(component.tasks.length).toBe(0);
   });
+  
+  it('should call delete function after confirmation inside a modal', () => {
+    pending(); // TODO: test deletion after delete confirmation modal appears
+    const taskStub: Task = { description: 'taskStub', done: false };
+    spyOn(component, 'deleteTask');
+    component.showDeleteModalForTask(taskStub);
+    expect(component.deleteTask).toHaveBeenCalledWith(taskStub);
+  });
 
   it('should mark a task as done', () => {
     const taskStub: Task = { description: 'taskStub', done: false };
@@ -139,3 +146,18 @@ describe('NotebookComponent', () => {
   });
 
 });
+
+class TaskServiceMock {
+  getTasks = () => of([]);
+  postTask = (task: Task) => of(task);
+  deleteTask = (task: Task) => of({});
+  toggleTaskAsDone = (task: Task) => {
+    task.done = !task.done;
+    return of(task);
+  }
+}
+
+class UiKitServiceMock {
+  useUIkitIcons = () => {};
+  createConfirmationModal = (message: string) => new Promise(() => {});
+}

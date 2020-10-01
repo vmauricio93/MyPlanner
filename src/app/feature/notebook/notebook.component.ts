@@ -1,10 +1,8 @@
 import { Component, ElementRef, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, Validators } from '@angular/forms';
 import { TaskService } from 'src/app/core/task.service';
+import { UiKitService } from 'src/app/core/ui-kit.service';
 import { Task } from 'src/app/shared/task';
-
-import UIkit from 'uikit';
-import Icons from 'uikit/dist/js/uikit-icons';
 
 @Component({
   selector: 'app-notebook',
@@ -15,12 +13,13 @@ export class NotebookComponent implements OnInit {
   tasks: Task[];
   newTaskFormArray: FormArray = new FormArray([]);
 
-  constructor(private taskService: TaskService) { }
+  constructor(
+    private taskService: TaskService,
+    private uiKit: UiKitService
+  ) { }
 
-  ngOnInit(): void {
-    // @ts-ignore
-    UIkit.use(Icons);
-    
+  ngOnInit(): void {    
+    this.uiKit.useUIkitIcons();
     this.taskService.getTasks().subscribe(tasks => {
       this.tasks = tasks;
     });
@@ -36,10 +35,12 @@ export class NotebookComponent implements OnInit {
     return this.newTaskFormArray.length > 0;
   }
 
-  saveTask(newTask: string): void {
-    if (this.isNewTaskEmpty(newTask)) { return; }
-    const newTaskDescription =  { description: newTask, done: false }
-    this.tasks.push(newTaskDescription);
+  saveTask(newTaskDescription: string): void {
+    if (this.isNewTaskEmpty(newTaskDescription)) { return; }
+    const newTask =  { description: newTaskDescription, done: false }
+    this.taskService.postTask(newTask).subscribe(task => {
+      this.tasks.push(task)
+    });
     this.clearTaskChanges();
   }
 
@@ -52,25 +53,26 @@ export class NotebookComponent implements OnInit {
   }
 
   showDeleteModalForTask(task: Task): void {
-    UIkit.modal.confirm(`
+    this.uiKit.createConfirmationModal(`
           <span class="uk-text-lead">
               ¿Está seguro de que desea eliminar la tarea seleccionada?
           </span>
-    `).then(
-      (confirm) => this.deleteTask(task),
-      (cancel) => { }
-    );    
+    `).then((confirm) => this.deleteTask(task), (cancel) => { });    
   }
 
   deleteTask(task: Task): void {
-    this.tasks = this.tasks.filter(otherTask => otherTask !== task);
+    this.taskService.deleteTask(task).subscribe(() => {
+      this.tasks = this.tasks.filter(otherTask => otherTask !== task);
+    });
   }
 
   toggleTaskAsDone(task: Task): void {
-    const doneTaskIndex = this.tasks.findIndex(
-      taskToToggle => taskToToggle === task
-    );
-    this.tasks[doneTaskIndex].done = !this.tasks[doneTaskIndex].done ;
+    this.taskService.toggleTaskAsDone(task).subscribe(doneTask => {
+      const doneTaskIndex = this.tasks.findIndex(
+        taskToToggle => taskToToggle === task
+      );
+      this.tasks[doneTaskIndex].done = doneTask.done ;
+    });
   }
 
 }

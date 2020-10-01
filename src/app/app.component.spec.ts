@@ -31,7 +31,7 @@ describe('AppComponent', () => {
   });
 
   it('should have a notebook', () => {
-    pending();  
+    pending(); // TODO: test Notebook component creation and routing
   });
 
 });

@@ -7,10 +7,23 @@ import { Task } from '../shared/task';
   providedIn: 'root'
 })
 export class TaskService {
+  tasksEndpoint = 'http://localhost:8080/api/v1/tasks';
   
   constructor(private http: HttpClient) { }
-
+  
   getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>('http://localhost:8080/api/v1/tasks');
+    return this.http.get<Task[]>(this.tasksEndpoint);
+  }
+  
+  postTask(task: Task): Observable<Task> {
+    return this.http.post<Task>(this.tasksEndpoint, task);
+  }
+  
+  deleteTask(task: Task): Observable<Task> {
+    return this.http.delete<Task>(`${this.tasksEndpoint}/${task.id}`);
+  }
+
+  toggleTaskAsDone(task: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.tasksEndpoint}/${task.id}`, task);
   }
 }

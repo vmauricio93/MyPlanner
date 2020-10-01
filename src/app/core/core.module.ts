@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { TaskService } from './task.service';
+import { UiKitService } from './ui-kit.service';
 
 
 
@@ -8,6 +9,6 @@ import { TaskService } from './task.service';
   imports: [
     HttpClientModule
   ],
-  providers: [ TaskService ]
+  providers: [ TaskService, UiKitService ]
 })
 export class CoreModule { }
