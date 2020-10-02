@@ -58,6 +58,20 @@ describe('TaskService', () => {
     );
     expect(req.request.method).toEqual('DELETE');
   });
+
+  it('should toggle a task as done in the server', () => {
+    const taskStub: Task = { id: 999, description: 'taskStub', done: false };
+    service.toggleTaskAsDone(taskStub).subscribe(doneTask => {
+      expect(doneTask.done).toBeTrue();
+    });
+
+    const req = httpTestingController.expectOne(
+      `${tasksEndpoint}/${taskStub.id}`
+    );
+    expect(req.request.method).toBe('PUT');
+    taskStub.done = true;
+    req.flush(taskStub);
+  });
   
   afterEach(() => {
     httpTestingController.verify();

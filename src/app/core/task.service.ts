@@ -19,8 +19,8 @@ export class TaskService {
     return this.http.post<Task>(this.tasksEndpoint, task);
   }
   
-  deleteTask(task: Task): Observable<Task> {
-    return this.http.delete<Task>(`${this.tasksEndpoint}/${task.id}`);
+  deleteTask(task: Task): Observable<void> {
+    return this.http.delete<void>(`${this.tasksEndpoint}/${task.id}`);
   }
 
   toggleTaskAsDone(task: Task): Observable<Task> {
