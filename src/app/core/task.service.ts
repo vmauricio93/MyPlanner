@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
+import { tap } from "rxjs/operators";
 import { Task } from '../shared/task';
 
 @Injectable({
@@ -12,9 +13,24 @@ export class TaskService {
   constructor(private http: HttpClient) { }
   
   getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(this.tasksEndpoint);
+    return this.http.get<Task[]>(this.tasksEndpoint)
+      .pipe(tap(tasks => this.formatTasksDateAndTime(tasks)));
   }
-  
+
+  private formatTasksDateAndTime(tasks: Task[]): Task[] {
+    tasks.map(task => {
+      if (task.date && Array.isArray(task.date)) {
+        task.date = new Date(task.date);
+      }
+
+      if (task.time && Array.isArray(task.time)) {
+        const time: [number] = task.time as any;
+        task.time = new Date(...time);
+      }
+    });
+    return tasks;
+  }
+
   postTask(task: Task): Observable<Task> {
     return this.http.post<Task>(this.tasksEndpoint, task);
   }

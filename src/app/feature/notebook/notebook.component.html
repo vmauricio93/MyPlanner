@@ -19,18 +19,47 @@
         <form
             *ngFor="let control of newTaskFormArray.controls; let i=index"
             class="new-task-form"
-            [formGroup]="$any(newTaskFormArray)"
+            [formGroup]="control"
         >
             <div class="uk-margin" uk-margin>
                 <input
                     type="text"
                     class="uk-input uk-form-width-large"
-                    [formControlName]="i"
+                    formControlName="description"
                     (keyup.enter)="saveTask(control.value)"
                     (keyup.esc)="clearTaskChanges()"
                     spellcheck="false"
-                    #newTaskInput
-                > {{ newTaskInput.focus() }}
+                    placeholder="Escriba su tarea aquí"
+                >
+                <div class="uk-inline">
+                    <span
+                        class="uk-form-icon uk-form-icon-flip"
+                        uk-icon="icon:  calendar"
+                    ></span>
+                    <ng2-flatpickr
+                        formControlName="date"
+                        addClass="uk-input"
+                    >                        
+                    </ng2-flatpickr>
+                </div>
+                <div class="uk-inline">
+                    <span
+                        class="uk-form-icon uk-form-icon-flip"
+                        uk-icon="icon:  clock"
+                    ></span>
+                    <ng2-flatpickr
+                        formControlName="time"
+                        addClass="uk-input"
+                        [config]="{
+                            enableTime: true,
+                            noCalendar: true,
+                            dateFormat: 'H:i',
+                            time_24hr: false
+                        }"
+                    >                        
+                    </ng2-flatpickr>
+                </div>
+                <div></div>
                 <button
                     class="uk-button uk-button-default"
                     type="button"

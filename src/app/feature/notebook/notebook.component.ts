@@ -1,5 +1,6 @@
-import { Component, ElementRef, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
-import { FormArray, FormControl, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { FlatpickrService } from 'src/app/core/flatpickr.service';
 import { TaskService } from 'src/app/core/task.service';
 import { UiKitService } from 'src/app/core/ui-kit.service';
 import { Task } from 'src/app/shared/task';
@@ -15,11 +16,13 @@ export class NotebookComponent implements OnInit {
 
   constructor(
     private taskService: TaskService,
-    private uiKit: UiKitService
+    private uiKit: UiKitService,
+    private flatpickr: FlatpickrService
   ) { }
 
   ngOnInit(): void {    
     this.uiKit.useUIkitIcons();
+    this.flatpickr.localizeSpanish();
     this.taskService.getTasks().subscribe(tasks => {
       this.tasks = tasks;
     });
@@ -27,25 +30,36 @@ export class NotebookComponent implements OnInit {
 
   promptForNewTask(): void {
     if (this.newTaskInputPromptExists()) { return; }
-    const newFormControl = new FormControl('');
-    this.newTaskFormArray.push(newFormControl);
+    const newFormGroup = new FormGroup({
+      description: new FormControl(''),
+      date: new FormControl(''),
+      time: new FormControl('')
+    });
+    this.newTaskFormArray.push(newFormGroup);
   } 
 
   private newTaskInputPromptExists(): boolean {
     return this.newTaskFormArray.length > 0;
   }
 
-  saveTask(newTaskDescription: string): void {
-    if (this.isNewTaskEmpty(newTaskDescription)) { return; }
-    const newTask =  { description: newTaskDescription, done: false }
+  saveTask(newTask: Task): void {
+    if (this.isNewTaskEmpty(newTask)) { return; }
+    newTask = this.formatNewTask(newTask);
     this.taskService.postTask(newTask).subscribe(task => {
       this.tasks.push(task)
     });
     this.clearTaskChanges();
   }
 
-  private isNewTaskEmpty(newTask: string): boolean {
-    return newTask.trim().length == 0;
+  private isNewTaskEmpty(newTask: Task): boolean {
+    return newTask.description.trim().length == 0;
+  }
+
+  private formatNewTask(task: Task): Task {
+    task.done = false;
+    task.date = task.date[0];
+    task.time = task.time[0];
+    return task;
   }
 
   clearTaskChanges(): void {

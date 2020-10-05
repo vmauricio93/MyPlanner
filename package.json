@@ -19,6 +19,8 @@
     "@angular/platform-browser": "~10.1.2",
     "@angular/platform-browser-dynamic": "~10.1.2",
     "@angular/router": "~10.1.2",
+    "flatpickr": "^4.6.6",
+    "ng2-flatpickr": "^9.0.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "uikit": "^3.5.7",

@@ -2,6 +2,7 @@ import { DebugElement } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { Ng2FlatpickrModule } from 'ng2-flatpickr';
 import { of } from 'rxjs';
 import { TaskService } from 'src/app/core/task.service';
 import { UiKitService } from 'src/app/core/ui-kit.service';
@@ -17,7 +18,7 @@ describe('NotebookComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ NotebookComponent ],
-      imports: [ ReactiveFormsModule ],
+      imports: [ ReactiveFormsModule, Ng2FlatpickrModule ],
       providers: [
         { provide: TaskService, useClass: TaskServiceMock },
         { provide: UiKitService, useClass: UiKitServiceMock }
@@ -70,8 +71,13 @@ describe('NotebookComponent', () => {
   );
 
   it('should save a new task', () => {
-    const formControlValueStub = 'taskStub';
-    component.saveTask(formControlValueStub);
+    const taskStub = {
+      description: 'taskStub',
+      date: new Date(),
+      time: new Date(),
+      done: false
+    };
+    component.saveTask(taskStub);
     fixture.detectChanges();
 
     const newTaskListItem = debugElement.query(
@@ -105,7 +111,8 @@ describe('NotebookComponent', () => {
   });
 
   it('should not save an empty task', () => {
-    component.saveTask('        ');
+    const emptyTaskStub: Task = { description: '        ', done: false };
+    component.saveTask(emptyTaskStub);
     fixture.detectChanges();
 
     const newTaskListItem = debugElement.query(
@@ -126,13 +133,36 @@ describe('NotebookComponent', () => {
     expect(component.tasks.length).toBe(0);
   });
   
-  it('should call delete function after confirmation inside a modal', () => {
-    pending(); // TODO: test deletion after delete confirmation modal appears
-    const taskStub: Task = { description: 'taskStub', done: false };
-    spyOn(component, 'deleteTask');
-    component.showDeleteModalForTask(taskStub);
-    expect(component.deleteTask).toHaveBeenCalledWith(taskStub);
-  });
+  it('should call delete function after confirmation modal', fakeAsync (
+      () => {
+        const uiKitService = TestBed.inject(UiKitService);
+        spyOn(uiKitService, 'createConfirmationModal').and.returnValue(
+          Promise.resolve()
+        );
+        
+        const taskStub: Task = { description: 'taskStub', done: false };
+        spyOn(component, 'deleteTask');
+        component.showDeleteModalForTask(taskStub);
+        tick();
+        expect(component.deleteTask).toHaveBeenCalledWith(taskStub);
+    })
+  );
+
+  it(
+    'should not delete a task if confimation modal is close with "cancel"',
+    fakeAsync(() => {
+      const uiKitService = TestBed.inject(UiKitService);
+      spyOn(uiKitService, 'createConfirmationModal').and.returnValue(
+        Promise.reject()
+      );
+      
+      const taskStub: Task = { description: 'taskStub', done: false };
+      spyOn(component, 'deleteTask');
+      component.showDeleteModalForTask(taskStub);
+      tick();
+      expect(component.deleteTask).not.toHaveBeenCalled();
+    })
+  );
 
   it('should mark a task as done', () => {
     const taskStub: Task = { description: 'taskStub', done: false };
@@ -159,5 +189,5 @@ class TaskServiceMock {
 
 class UiKitServiceMock {
   useUIkitIcons = () => {};
-  createConfirmationModal = (message: string) => new Promise(() => {});
+  createConfirmationModal = (message: string) => {};
 }
