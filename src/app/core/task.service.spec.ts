@@ -76,10 +76,10 @@ describe('TaskService', () => {
   it('should format the date and time of a task', () => {
     const taskStub: Task = {
       description: 'taskStub',
-      // toString() to mimic the Date constructor parsing when passing an array
-      // to it
+      // toString() to mimic the Date constructor parsing when passing an
+      // array to it
       date: new Date([2020, 1, 1].toString()),
-      time: new Date(1970, 2, 1, 17, 0),
+      time: new Date(1970, 0, 1, 14, 0),
       done: false
     };
     service.getTasks().subscribe(tasks => {
@@ -91,7 +91,7 @@ describe('TaskService', () => {
     req.flush([{
         description: 'taskStub',
         date: [2020, 1, 1],
-        time: [1970, 2, 1, 17, 0],
+        time: 68400,
         done: false
       }]);
   });

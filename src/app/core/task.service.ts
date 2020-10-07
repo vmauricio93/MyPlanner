@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { tap } from "rxjs/operators";
+import { map, tap } from "rxjs/operators";
 import { Task } from '../shared/task';
 
 @Injectable({
@@ -14,25 +14,29 @@ export class TaskService {
   
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(this.tasksEndpoint)
-      .pipe(tap(tasks => this.formatTasksDateAndTime(tasks)));
+      .pipe(tap(tasks => this.formatAllTasksDateAndTime(tasks)));
   }
 
-  private formatTasksDateAndTime(tasks: Task[]): Task[] {
-    tasks.map(task => {
-      if (task.date && Array.isArray(task.date)) {
-        task.date = new Date(task.date);
-      }
-
-      if (task.time && Array.isArray(task.time)) {
-        const time: [number] = task.time as any;
-        task.time = new Date(...time);
-      }
-    });
+  private formatAllTasksDateAndTime(tasks: Task[]): Task[] {
+    tasks.map(task => this.formatTaskDateAndTime(task));
     return tasks;
   }
 
+  private formatTaskDateAndTime(task: Task): Task {
+    // The server returns the date as an array of year, month and day
+    if (task.date && Array.isArray(task.date)) {
+      task.date = new Date(task.date);
+    }
+    // The server returns the time as a number (timestamp)
+    if (task.time && Number.isInteger(task.time)) {
+      task.time = new Date(task.time as any * 1000);
+    }
+    return task;
+  }
+
   postTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(this.tasksEndpoint, task);
+    return this.http.post<Task>(this.tasksEndpoint, task)
+      .pipe(map(task => this.formatTaskDateAndTime(task)));
   }
   
   deleteTask(task: Task): Observable<void> {

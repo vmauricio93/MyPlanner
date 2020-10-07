@@ -6,6 +6,7 @@ import { Ng2FlatpickrModule } from 'ng2-flatpickr';
 import { of } from 'rxjs';
 import { TaskService } from 'src/app/core/task.service';
 import { UiKitService } from 'src/app/core/ui-kit.service';
+import { SharedModule } from 'src/app/shared/shared.module';
 import { Task } from 'src/app/shared/task';
 
 import { NotebookComponent } from './notebook.component';
@@ -14,11 +15,13 @@ describe('NotebookComponent', () => {
   let component: NotebookComponent;
   let fixture: ComponentFixture<NotebookComponent>;
   let debugElement: DebugElement;
+  let taskStub: Task;
+  let firstTask: DebugElement;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ NotebookComponent ],
-      imports: [ ReactiveFormsModule, Ng2FlatpickrModule ],
+      imports: [ SharedModule, ReactiveFormsModule, Ng2FlatpickrModule ],
       providers: [
         { provide: TaskService, useClass: TaskServiceMock },
         { provide: UiKitService, useClass: UiKitServiceMock }
@@ -31,7 +34,19 @@ describe('NotebookComponent', () => {
     fixture = TestBed.createComponent(NotebookComponent);
     component = fixture.componentInstance;
     debugElement = fixture.debugElement;
+    taskStub = {
+      description: 'taskStub',
+      date: new Date(),
+      time: new Date(),
+      place: 'taskPlace',
+      tag: 'taskTag',
+      done: false
+    };
     fixture.detectChanges();
+
+    firstTask = debugElement.query(
+      By.css('.task-list li:first-of-type')
+    );
   });
 
   it('should create', () => {
@@ -45,18 +60,22 @@ describe('NotebookComponent', () => {
   it('should show the task list', () => {
     const taskList = debugElement.query(By.css('.task-list'));
     expect(taskList).not.toBeNull();
+  });  
+
+  it('should show the description for a task in the list', () => {   
+    expect(firstTask.nativeElement.textContent).toContain('taskStub');
   });
 
-  it('should show the task description for a task in the list', () => {
-    const taskStub: Task = { description: 'taskStub', done: false };
-    component.tasks = [taskStub];
-    fixture.detectChanges();
-    
-    const firstTask = debugElement.query(
-      By.css('.task-list li:first-of-type')
-    );
+  it('should show the date for a task in the list', () => {
+    const date = new Date().toLocaleDateString('es-CO', { year: '2-digit'});
+    expect(firstTask.nativeElement.textContent).toContain(date);
+  });
 
-    expect(firstTask.nativeElement.textContent).toBe('taskStub');
+  it('should show the time for a task in the list', () => {
+    const time = new Date().toLocaleTimeString(
+      [], { hour: '2-digit', minute: '2-digit' }
+    );
+    expect(firstTask.nativeElement.textContent).toContain(time);
   });
 
   it('should prompt for a new task when the "Añadir tarea" button is clicked',
@@ -65,26 +84,18 @@ describe('NotebookComponent', () => {
       fixture.detectChanges();
       
       const newTaskInput = debugElement.queryAll(By.css('.new-task-form'));
-
       expect(newTaskInput.length).toBeGreaterThan(0);
     }
   );
 
   it('should save a new task', () => {
-    const taskStub = {
-      description: 'taskStub',
-      date: new Date(),
-      time: new Date(),
-      done: false
-    };
     component.saveTask(taskStub);
     fixture.detectChanges();
 
-    const newTaskListItem = debugElement.query(
-      By.css('.task-list li:first-of-type')
+    const secondTask = debugElement.query(
+      By.css('.task-list li:nth-of-type(2)')
     );
-
-    expect(newTaskListItem.nativeElement.textContent).toBe('taskStub');
+    expect(secondTask.nativeElement.textContent).toContain('taskStub');
   });
 
   it('should dismiss the task form when user clicks on the "X" button', () => {
@@ -111,8 +122,9 @@ describe('NotebookComponent', () => {
   });
 
   it('should not save an empty task', () => {
-    const emptyTaskStub: Task = { description: '        ', done: false };
-    component.saveTask(emptyTaskStub);
+    component.tasks = [];
+    taskStub.description = '        ';
+    component.saveTask(taskStub);
     fixture.detectChanges();
 
     const newTaskListItem = debugElement.query(
@@ -123,12 +135,8 @@ describe('NotebookComponent', () => {
   });
 
   it('should delete a task', () => {
-    const taskStub: Task = { description: 'taskStub', done: false };
     component.tasks = [taskStub];
-    fixture.detectChanges();
-
     component.deleteTask(taskStub);
-    fixture.detectChanges();
 
     expect(component.tasks.length).toBe(0);
   });
@@ -140,7 +148,6 @@ describe('NotebookComponent', () => {
           Promise.resolve()
         );
         
-        const taskStub: Task = { description: 'taskStub', done: false };
         spyOn(component, 'deleteTask');
         component.showDeleteModalForTask(taskStub);
         tick();
@@ -156,7 +163,6 @@ describe('NotebookComponent', () => {
         Promise.reject()
       );
       
-      const taskStub: Task = { description: 'taskStub', done: false };
       spyOn(component, 'deleteTask');
       component.showDeleteModalForTask(taskStub);
       tick();
@@ -165,20 +171,75 @@ describe('NotebookComponent', () => {
   );
 
   it('should mark a task as done', () => {
-    const taskStub: Task = { description: 'taskStub', done: false };
     component.tasks = [taskStub];
-    fixture.detectChanges();
-
     component.toggleTaskAsDone(taskStub);
-    fixture.detectChanges();
 
     expect(component.tasks[0].done).toBeTrue();    
+  });
+
+  it('should show the place for a task in the list', () => {
+    expect(firstTask.nativeElement.textContent).toContain('taskPlace');
+  });
+
+  it('should show a tag for a task in the list', () => {
+    expect(firstTask.nativeElement.textContent).toContain('taskTag');
+  });
+
+  it('should have a list of places for the list of tasks', () => {
+    expect(component.places).toEqual(['taskPlace']);
+  });
+
+  it('should not update places if a saved task does not have a place', () => {
+    component.places = [];
+    taskStub.place = null;
+    component.saveTask(taskStub);
+
+    expect(component.places.length).toBe(0);
+  });
+
+  it('should update places if the place is not on the list', () => {
+    taskStub.place = 'newPlace';
+    component.saveTask(taskStub);
+
+    expect(component.places.length).toBe(2);
+  });
+
+  it(`should not remove a place from suggestions when deleting a task if it is
+    present in any other task`, () => {
+      component.tasks = [taskStub];
+
+      const secondTaskStub: Task = { ...taskStub };
+      component.saveTask(secondTaskStub);
+
+      component.deleteTask(taskStub);
+      
+      expect(component.places).toEqual(['taskPlace']);
+  });
+
+  it(`should remove a place from suggestions when deleting a task if it is not
+  present in any other task`, () => {
+    component.tasks = [taskStub];
+
+    const secondTaskStub: Task = { ...taskStub };
+    secondTaskStub.place = 'secondPlace';
+    component.saveTask(secondTaskStub);
+    
+    component.deleteTask(taskStub);
+
+    expect(component.places).toEqual(['secondPlace']);
   });
 
 });
 
 class TaskServiceMock {
-  getTasks = () => of([]);
+  getTasks = () => of([{
+    description: 'taskStub',
+    date: new Date(),
+    time: new Date(),
+    place: 'taskPlace',
+    tag: 'taskTag',
+    done: false
+  }]);
   postTask = (task: Task) => of(task);
   deleteTask = (task: Task) => of({});
   toggleTaskAsDone = (task: Task) => {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { FlatpickrService } from 'src/app/core/flatpickr.service';
 import { TaskService } from 'src/app/core/task.service';
@@ -14,6 +14,8 @@ export class NotebookComponent implements OnInit {
   tasks: Task[];
   newTaskFormArray: FormArray = new FormArray([]);
 
+  places: string[];
+
   constructor(
     private taskService: TaskService,
     private uiKit: UiKitService,
@@ -25,6 +27,9 @@ export class NotebookComponent implements OnInit {
     this.flatpickr.localizeSpanish();
     this.taskService.getTasks().subscribe(tasks => {
       this.tasks = tasks;
+      this.places = [...new Set(
+        tasks.filter(task => task.place).map(task => task.place)
+      )];
     });
   }
 
@@ -33,7 +38,9 @@ export class NotebookComponent implements OnInit {
     const newFormGroup = new FormGroup({
       description: new FormControl(''),
       date: new FormControl(''),
-      time: new FormControl('')
+      time: new FormControl(''),
+      place: new FormControl(''),
+      tag: new FormControl('')
     });
     this.newTaskFormArray.push(newFormGroup);
   } 
@@ -46,9 +53,16 @@ export class NotebookComponent implements OnInit {
     if (this.isNewTaskEmpty(newTask)) { return; }
     newTask = this.formatNewTask(newTask);
     this.taskService.postTask(newTask).subscribe(task => {
-      this.tasks.push(task)
+      this.tasks.push(task);
+      this.addPlaceToSuggestions(task);
     });
     this.clearTaskChanges();
+  }
+
+  private addPlaceToSuggestions(task: Task): void {
+    if (task.place && this.places.indexOf(task.place) === -1) {
+      this.places.push(task.place);
+    }
   }
 
   private isNewTaskEmpty(newTask: Task): boolean {
@@ -77,7 +91,21 @@ export class NotebookComponent implements OnInit {
   deleteTask(task: Task): void {
     this.taskService.deleteTask(task).subscribe(() => {
       this.tasks = this.tasks.filter(otherTask => otherTask !== task);
+      this.RemovePlaceFromSuggestions(task);
     });
+  }
+
+  private RemovePlaceFromSuggestions(task: Task): void {
+    if (this.isPlaceNotPresentInAnyTask(task.place)) {
+      const placeToRemoveIndex = this.places.findIndex(
+        placeToDelete => placeToDelete === task.place
+      );
+      this.places.splice(placeToRemoveIndex, 1);
+    }
+  }
+
+  private isPlaceNotPresentInAnyTask(place: string): boolean {
+    return this.tasks.filter(task => task.place === place).length == 0;
   }
 
   toggleTaskAsDone(task: Task): void {
