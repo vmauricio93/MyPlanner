@@ -17,6 +17,7 @@ cache:
      - ./node_modules
 
 before_install:
+  - export TZ=America/Bogota
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
 
 install:
