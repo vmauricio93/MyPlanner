@@ -1,1 +1,26 @@
+<nav
+    class="uk-navbar-container uk-navbar-transparent uk-light uk-background-primary"
+    uk-navbar
+>
+    <div class="uk-navbar-center">
+        <ul class="uk-navbar-nav"> 
+            <li routerLinkActive="uk-active">
+                <a
+                    routerLink="/notebook"
+                >
+                    <span uk-icon="icon: file-edit"></span>
+                    Cuaderno
+                </a>
+            </li>
+            <li routerLinkActive="uk-active">
+                <a
+                    routerLink="/calendar"  
+                >
+                    <span uk-icon="icon: calendar"></span>
+                    Calendario
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
 <router-outlet></router-outlet>

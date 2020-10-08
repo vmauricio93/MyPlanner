@@ -1,36 +1,34 @@
-<div class="uk-section uk-section-primary">
+<div
+    class="uk-section uk-section-small uk-section-primary"
+    uk-sticky="animation: uk-animation-slide-top"
+    id="headerSection"
+>  
     <div class="uk-container">
-        <h3>Mi Cuaderno</h3>
-        <ul class="task-list uk-list uk-list-divider">
-            <li
-                *ngFor="let task of tasks"
-                class="uk-child-width-expand@s uk-text-center"
-                uk-grid
+        <div class="uk-child-width-expand@s" uk-grid>
+            <form
+                class="uk-search uk-search-default"
+                [formGroup]="searchFormGroup"
             >
-                <div
-                    class="task"
-                    [ngClass]="{'task-done': task.done}"
-                    (click)="toggleTaskAsDone(task)"
-                >{{ task.description }}</div>
-                <div> {{ task.date | date: "dd/MM/yy" }}</div>
-                <div> {{ task.time | date: "shortTime" }}</div>
-                <div> {{ task.place }}</div>
-                <div>
-                    <span
-                        [ngClass]="{'uk-badge': task.tag }"
-                    > {{ task.tag }}</span>
-                </div>
-                <div>
-                    <button
-                        class="uk-button uk-button-text"
-                        (click)="showDeleteModalForTask(task)"
-                    >
-                        <span uk-icon="icon:  trash"></span>
-                    </button>
-                </div>
-            </li>
-        </ul>
-        <form
+                <span class="uk-search-icon-flip" uk-search-icon></span>
+                <input
+                    type="search"
+                    class="uk-search-input"
+                    placeholder="Buscar tareas"
+                    (input)="filterTasksByString(searchInput.value)"
+                    #searchInput
+                >
+            </form>
+            <div class="uk-flex uk-flex-center">
+                <button
+                    class="uk-button uk-button-default"
+                    (click)="promptForNewTask()"
+                >
+                    Añadir tarea
+                </button>
+            </div>
+        </div>
+        <div class="uk-child-width-expand@s" uk-grid>
+            <form
             *ngFor="let control of newTaskFormArray.controls; let i=index"
             class="new-task-form"
             [formGroup]="control"
@@ -100,6 +98,8 @@
                         formControlName="tag"
                         spellcheck="false"
                         placeholder="Categoría"
+                        appAutocomplete
+                        [options]="tags"
                         >
                 </div>
                 <div></div>
@@ -119,13 +119,39 @@
                 </button>
             </div>
         </form>
-        <div class="uk-flex uk-flex-around">
-            <button
-                class="uk-button uk-button-default"
-                (click)="promptForNewTask()"
-            >
-                Añadir tarea
-            </button>
         </div>
+    </div>
+</div>
+<div class="uk-section uk-section-muted">
+    <div class="uk-container">
+        <ul class="task-list uk-list uk-list-divider">
+            <li
+                *ngFor="let task of filteredTasks"
+                class="uk-child-width-expand@s uk-text-center"
+                uk-grid
+            >
+                <div
+                    class="task"
+                    [ngClass]="{'task-done': task.done}"
+                    (click)="toggleTaskAsDone(task)"
+                >{{ task.description }}</div>
+                <div> {{ task.date | date: "dd/MM/yy" }}</div>
+                <div> {{ task.time | date: "shortTime" }}</div>
+                <div> {{ task.place }}</div>
+                <div>
+                    <span
+                        [ngClass]="{'uk-badge': task.tag }"
+                    > {{ task.tag }}</span>
+                </div>
+                <div>
+                    <button
+                        class="uk-button uk-button-text"
+                        (click)="showDeleteModalForTask(task)"
+                    >
+                        <span uk-icon="icon:  trash"></span>
+                    </button>
+                </div>
+            </li>
+        </ul>
     </div>
 </div>

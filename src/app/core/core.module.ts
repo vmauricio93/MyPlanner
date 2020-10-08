@@ -3,6 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { TaskService } from './task.service';
 import { UiKitService } from './ui-kit.service';
 import { FlatpickrService } from './flatpickr.service';
+import { FuseService } from './fuse.service';
 
 
 
@@ -13,7 +14,8 @@ import { FlatpickrService } from './flatpickr.service';
   providers: [
     TaskService,
     UiKitService,
-    FlatpickrService
+    FlatpickrService,
+    FuseService
   ]
 })
 export class CoreModule { }

@@ -14,7 +14,10 @@ export class TaskService {
   
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(this.tasksEndpoint)
-      .pipe(tap(tasks => this.formatAllTasksDateAndTime(tasks)));
+      .pipe(
+        tap(tasks => this.formatAllTasksDateAndTime(tasks)),
+        tap(tasks => tasks.reverse())
+      );
   }
 
   private formatAllTasksDateAndTime(tasks: Task[]): Task[] {

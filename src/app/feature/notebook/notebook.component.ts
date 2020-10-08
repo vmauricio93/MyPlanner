@@ -1,6 +1,7 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { FlatpickrService } from 'src/app/core/flatpickr.service';
+import { FuseService } from 'src/app/core/fuse.service';
 import { TaskService } from 'src/app/core/task.service';
 import { UiKitService } from 'src/app/core/ui-kit.service';
 import { Task } from 'src/app/shared/task';
@@ -12,14 +13,20 @@ import { Task } from 'src/app/shared/task';
 })
 export class NotebookComponent implements OnInit {
   tasks: Task[];
+  filteredTasks: Task[];
+  places: string[];
+  tags: string[];
+  
   newTaskFormArray: FormArray = new FormArray([]);
 
-  places: string[];
+  searchFormGroup: FormGroup = new FormGroup({ query: new FormControl('') });
+  searchPattern: string = "";
 
   constructor(
     private taskService: TaskService,
     private uiKit: UiKitService,
-    private flatpickr: FlatpickrService
+    private flatpickr: FlatpickrService,
+    private fuse: FuseService
   ) { }
 
   ngOnInit(): void {    
@@ -27,10 +34,30 @@ export class NotebookComponent implements OnInit {
     this.flatpickr.localizeSpanish();
     this.taskService.getTasks().subscribe(tasks => {
       this.tasks = tasks;
-      this.places = [...new Set(
-        tasks.filter(task => task.place).map(task => task.place)
-      )];
+      this.filterTasksByString(this.searchPattern);
+      this.places = this.extractListOfTasksCommonProperties(tasks, 'place');
+      this.tags = this.extractListOfTasksCommonProperties(tasks, 'tag');
     });
+  }
+
+  filterTasksByString(pattern: string): void {
+    if (pattern && pattern.trim().length > 0) {
+      this.searchPattern = pattern.trim();
+      this.filteredTasks = this.fuse.searchFromList(
+        this.searchPattern, this.tasks, ['description', 'place', 'tag']
+      );
+    } else {
+      this.searchPattern = "";
+      this.filteredTasks = this.tasks;
+    }
+  }
+
+  private extractListOfTasksCommonProperties(
+    tasks: Task[], property: string
+  ): any[] {
+    return [...new Set(
+      tasks.filter(task => task[property]).map(task => task[property])
+    )];
   }
 
   promptForNewTask(): void {
@@ -53,16 +80,12 @@ export class NotebookComponent implements OnInit {
     if (this.isNewTaskEmpty(newTask)) { return; }
     newTask = this.formatNewTask(newTask);
     this.taskService.postTask(newTask).subscribe(task => {
-      this.tasks.push(task);
-      this.addPlaceToSuggestions(task);
+      this.tasks.unshift(task);
+      this.filterTasksByString(this.searchPattern);
+      this.addTaskPropertyToSuggestions(task, 'place', this.places);
+      this.addTaskPropertyToSuggestions(task, 'tag', this.tags);
     });
     this.clearTaskChanges();
-  }
-
-  private addPlaceToSuggestions(task: Task): void {
-    if (task.place && this.places.indexOf(task.place) === -1) {
-      this.places.push(task.place);
-    }
   }
 
   private isNewTaskEmpty(newTask: Task): boolean {
@@ -76,7 +99,15 @@ export class NotebookComponent implements OnInit {
     return task;
   }
 
-  clearTaskChanges(): void {
+  private addTaskPropertyToSuggestions(
+    task: Task, property: string, suggestions: string[]
+  ): void {
+    if (task[property] && suggestions.indexOf(task[property]) === -1) {
+      suggestions.push(task[property]);
+    }
+  }
+
+  private clearTaskChanges(): void {
     this.newTaskFormArray.clear();
   }
 
@@ -91,21 +122,28 @@ export class NotebookComponent implements OnInit {
   deleteTask(task: Task): void {
     this.taskService.deleteTask(task).subscribe(() => {
       this.tasks = this.tasks.filter(otherTask => otherTask !== task);
-      this.RemovePlaceFromSuggestions(task);
+      this.filterTasksByString(this.searchPattern);
+      this.removeTaskPropertyFromSuggestions(task, 'place', this.places);
+      this.removeTaskPropertyFromSuggestions(task, 'tag', this.tags);
     });
   }
 
-  private RemovePlaceFromSuggestions(task: Task): void {
-    if (this.isPlaceNotPresentInAnyTask(task.place)) {
-      const placeToRemoveIndex = this.places.findIndex(
-        placeToDelete => placeToDelete === task.place
+  private removeTaskPropertyFromSuggestions(
+    task: Task, property: string, suggestions: string[]
+  ): void {
+    if (this.isTaskPropertyNotPresentInAnyTask(task[property], property)) {
+      const propertyToRemoveIndex = suggestions.findIndex(
+        propertyToDelete => propertyToDelete === task[property]
       );
-      this.places.splice(placeToRemoveIndex, 1);
+      suggestions.splice(propertyToRemoveIndex, 1);
     }
   }
 
-  private isPlaceNotPresentInAnyTask(place: string): boolean {
-    return this.tasks.filter(task => task.place === place).length == 0;
+  private isTaskPropertyNotPresentInAnyTask(
+    propertyValue: string, property: string
+  ): boolean {
+    return this.tasks
+      .filter(task => task[property] === propertyValue).length == 0;
   }
 
   toggleTaskAsDone(task: Task): void {

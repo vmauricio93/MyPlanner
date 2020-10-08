@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { Ng2FlatpickrModule } from 'ng2-flatpickr';
 import { of } from 'rxjs';
+import { FuseService } from 'src/app/core/fuse.service';
 import { TaskService } from 'src/app/core/task.service';
 import { UiKitService } from 'src/app/core/ui-kit.service';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -24,7 +25,8 @@ describe('NotebookComponent', () => {
       imports: [ SharedModule, ReactiveFormsModule, Ng2FlatpickrModule ],
       providers: [
         { provide: TaskService, useClass: TaskServiceMock },
-        { provide: UiKitService, useClass: UiKitServiceMock }
+        { provide: UiKitService, useClass: UiKitServiceMock },
+        { provide: FuseService, useClass: FuseServiceMock }
       ]
     })
     .compileComponents();
@@ -122,7 +124,7 @@ describe('NotebookComponent', () => {
   });
 
   it('should not save an empty task', () => {
-    component.tasks = [];
+    component.filteredTasks = [];
     taskStub.description = '        ';
     component.saveTask(taskStub);
     fixture.detectChanges();
@@ -189,6 +191,10 @@ describe('NotebookComponent', () => {
     expect(component.places).toEqual(['taskPlace']);
   });
 
+  it('should have a list of tags for the list of tasks', () => {
+    expect(component.tags).toEqual(['taskTag']);
+  });
+
   it('should not update places if a saved task does not have a place', () => {
     component.places = [];
     taskStub.place = null;
@@ -204,7 +210,7 @@ describe('NotebookComponent', () => {
     expect(component.places.length).toBe(2);
   });
 
-  it(`should not remove a place from suggestions when deleting a task if it is
+  it(`should not remove a tag from suggestions when deleting a task if it is
     present in any other task`, () => {
       component.tasks = [taskStub];
 
@@ -213,7 +219,7 @@ describe('NotebookComponent', () => {
 
       component.deleteTask(taskStub);
       
-      expect(component.places).toEqual(['taskPlace']);
+      expect(component.tags).toEqual(['taskTag']);
   });
 
   it(`should remove a place from suggestions when deleting a task if it is not
@@ -227,6 +233,27 @@ describe('NotebookComponent', () => {
     component.deleteTask(taskStub);
 
     expect(component.places).toEqual(['secondPlace']);
+  });
+
+  it('should filter tasks by description', () => {
+    const secondTaskStub: Task = { ...taskStub };
+    secondTaskStub.description = 'secondTask';
+    component.saveTask(secondTaskStub);
+
+    const fuseService = TestBed.inject(FuseService);
+    spyOn(fuseService, 'searchFromList').and.returnValue([secondTaskStub])
+
+    component.filterTasksByString('seco');
+    expect(component.filteredTasks).toEqual([secondTaskStub]);
+  });
+
+  it('should not filter tasks if search filter is empty', () => {
+    const secondTaskStub: Task = { ...taskStub };
+    secondTaskStub.description = 'secondTask';
+    component.saveTask(secondTaskStub);
+
+    component.filterTasksByString('      ');
+    expect(component.filteredTasks).toEqual(component.tasks);
   });
 
 });
@@ -251,4 +278,8 @@ class TaskServiceMock {
 class UiKitServiceMock {
   useUIkitIcons = () => {};
   createConfirmationModal = (message: string) => {};
+}
+
+class FuseServiceMock {
+  searchFromList = (pattern: string, list: any[], keys: string[]) => [{}];
 }

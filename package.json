@@ -21,6 +21,7 @@
     "@angular/router": "~10.1.2",
     "autocompleter": "^6.0.3",
     "flatpickr": "^4.6.6",
+    "fuse.js": "^6.4.1",
     "ng2-flatpickr": "^9.0.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
