@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { FlatpickrService } from 'src/app/core/flatpickr.service';
 import { FuseService } from 'src/app/core/fuse.service';
 import { TaskService } from 'src/app/core/task.service';
@@ -11,13 +12,16 @@ import { Task } from 'src/app/shared/task';
   templateUrl: './notebook.component.html',
   styleUrls: ['./notebook.component.scss']
 })
-export class NotebookComponent implements OnInit {
+export class NotebookComponent implements OnInit, AfterViewInit {
   tasks: Task[];
   filteredTasks: Task[];
   places: string[];
   tags: string[];
   
   newTaskFormArray: FormArray = new FormArray([]);
+  
+  @ViewChildren('descriptionInput') descriptionInputRef: QueryList<any>;
+  private descriptionInputSubscription = new Subscription();
 
   searchFormGroup: FormGroup = new FormGroup({ query: new FormControl('') });
   searchPattern: string = "";
@@ -38,6 +42,21 @@ export class NotebookComponent implements OnInit {
       this.places = this.extractListOfTasksCommonProperties(tasks, 'place');
       this.tags = this.extractListOfTasksCommonProperties(tasks, 'tag');
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.descriptionInputSubscription = this.descriptionInputRef.
+      changes.subscribe(
+      res => {
+        if (this.descriptionInputRef.length > 0) {
+          this.descriptionInputRef.last.nativeElement.focus();
+        }
+      }
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.descriptionInputSubscription.unsubscribe();
   }
 
   filterTasksByString(pattern: string): void {
