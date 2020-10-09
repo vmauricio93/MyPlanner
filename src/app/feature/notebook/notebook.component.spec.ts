@@ -80,15 +80,13 @@ describe('NotebookComponent', () => {
     expect(firstTask.nativeElement.textContent).toContain(time);
   });
 
-  it('should prompt for a new task when the "Añadir tarea" button is clicked',
-    () => {
-      component.promptForNewTask();
-      fixture.detectChanges();
-      
-      const newTaskInput = debugElement.queryAll(By.css('.new-task-form'));
-      expect(newTaskInput.length).toBeGreaterThan(0);
-    }
-  );
+  it('should prompt for a new task, creating a new form', () => {
+    component.promptForNewTask();
+    fixture.detectChanges();
+    
+    const newTaskInput = debugElement.queryAll(By.css('.new-task-form'));
+    expect(newTaskInput.length).toBeGreaterThan(0);
+    });
 
   it('should save a new task', () => {
     component.saveTask(taskStub);
@@ -115,7 +113,7 @@ describe('NotebookComponent', () => {
     expect(newTaskInput).toBeNull();
   });
 
-  it('should show only one input field when "Añadir tarea" is clicked', () => {
+  it('should show only one new form when prompting for a new task', () => {
     component.promptForNewTask();
     fixture.detectChanges();
     component.promptForNewTask();
@@ -223,7 +221,7 @@ describe('NotebookComponent', () => {
   });
 
   it(`should remove a place from suggestions when deleting a task if it is not
-  present in any other task`, () => {
+    present in any other task`, () => {
     component.tasks = [taskStub];
 
     const secondTaskStub: Task = { ...taskStub };
@@ -255,6 +253,13 @@ describe('NotebookComponent', () => {
     component.filterTasksByString('      ');
     expect(component.filteredTasks).toEqual(component.tasks);
   });
+
+  it('should create a form to edit a task', () => {
+      component.editTask(taskStub);
+      fixture.detectChanges();
+
+      pending();
+    });
 
 });
 

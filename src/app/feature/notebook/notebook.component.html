@@ -29,14 +29,14 @@
         </div>
         <div class="uk-child-width-expand@s" uk-grid>
             <form
-            *ngFor="let control of newTaskFormArray.controls; let i=index"
-            class="new-task-form"
-            [formGroup]="control"
-        >
+                *ngFor="let control of newTaskFormArray.controls; let i=index"
+                class="new-task-form"
+                [formGroup]="control"
+            >
             <div class="uk-margin" uk-margin>
                 <input
                     type="text"
-                    class="uk-input uk-form-width-large"
+                    class="uk-input uk-inline"
                     formControlName="description"
                     (keyup.esc)="clearTaskChanges()"
                     spellcheck="false"
@@ -136,16 +136,109 @@
                     class="task"
                     [ngClass]="{'task-done': task.done}"
                     (click)="toggleTaskAsDone(task)"
+                    *ngIf="!isTaskInEditMode(task)"
                 >{{ task.description }}</div>
-                <div> {{ task.date | date: "dd/MM/yy" }}</div>
-                <div> {{ task.time | date: "shortTime" }}</div>
-                <div> {{ task.place }}</div>
-                <div>
+                <div *ngIf="!isTaskInEditMode(task)">
+                    {{ task.date | date: "dd/MM/yy" }}
+                </div>
+                <div *ngIf="!isTaskInEditMode(task)">
+                    {{ task.time | date: "shortTime" }}
+                </div>
+                <div *ngIf="!isTaskInEditMode(task)">
+                    {{ task.place }}
+                </div>
+                <div *ngIf="!isTaskInEditMode(task)">
                     <span
                         [ngClass]="{'uk-badge': task.tag }"
                     > {{ task.tag }}</span>
                 </div>
-                <div>
+                <form
+                    *ngFor="let control of editTaskFormArray.controls; let i=index"
+                    class="edit-task-form"
+                    [formGroup]="control"
+                >  
+                    <input
+                        *ngIf="isTaskInEditMode(task)"
+                        type="text"
+                        class="uk-input uk-inline"
+                        formControlName="description"
+                        spellcheck="false"
+                        placeholder="Escriba su tarea aquí"
+                    >
+                    <div class="uk-inline" *ngIf="isTaskInEditMode(task)">
+                        <span
+                            class="uk-form-icon uk-form-icon-flip"
+                            uk-icon="icon:  calendar"
+                        ></span>
+                        <ng2-flatpickr
+                            formControlName="date"
+                            addClass="uk-input"
+                            placeholder="Fecha"
+                            [config]="{
+                                defaultDate: task.date ? task.date : null
+                            }"
+                        >                        
+                        </ng2-flatpickr>
+                    </div>
+                    <div class="uk-inline" *ngIf="isTaskInEditMode(task)">
+                        <span
+                            class="uk-form-icon uk-form-icon-flip"
+                            uk-icon="icon:  clock"
+                        ></span>
+                        <ng2-flatpickr
+                            formControlName="time"
+                            addClass="uk-input"
+                            [config]="{
+                                enableTime: true,
+                                noCalendar: true,
+                                dateFormat: 'H:i',
+                                time_24hr: false,
+                                allowInput: true,
+                                defaultHour: task.time ? task.time.getHours() : 12,
+                                defaultMinute: task.time ? task.time.getMinutes() : 0
+                            }"
+                            [placeholder]="task.time ? task.time.toLocaleTimeString() : 'Hora'"
+                        >                        
+                        </ng2-flatpickr>
+                    </div>
+                    <div class="uk-inline" *ngIf="isTaskInEditMode(task)">
+                        <span
+                            class="uk-form-icon uk-form-icon-flip"
+                            uk-icon="icon:  location"
+                        ></span>
+                        <input
+                            type="text"
+                            class="uk-input"
+                            formControlName="place"
+                            spellcheck="false"
+                            placeholder="Lugar"
+                            appAutocomplete
+                            [options]="places"
+                            >
+                    </div>
+                    <div class="uk-inline" *ngIf="isTaskInEditMode(task)">
+                        <span
+                            class="uk-form-icon uk-form-icon-flip"
+                            uk-icon="icon:  tag"
+                        ></span>
+                        <input
+                            type="text"
+                            class="uk-input"
+                            formControlName="tag"
+                            spellcheck="false"
+                            placeholder="Categoría"
+                            appAutocomplete
+                            [options]="tags"
+                            >
+                    </div>
+                </form>
+                <div class="uk-flex uk-flex-around  uk-width-1-6@m">
+                    <button
+                        class="edit-task-button uk-button uk-button-text"
+                        (click)="editTask(task)"
+                    >
+                        <span uk-icon="icon: pencil"></span>
+                    </button>
                     <button
                         class="uk-button uk-button-text"
                         (click)="showDeleteModalForTask(task)"

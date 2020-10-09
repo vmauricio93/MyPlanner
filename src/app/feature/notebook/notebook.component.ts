@@ -19,9 +19,11 @@ export class NotebookComponent implements OnInit, AfterViewInit {
   tags: string[];
   
   newTaskFormArray: FormArray = new FormArray([]);
-  
   @ViewChildren('descriptionInput') descriptionInputRef: QueryList<any>;
   private descriptionInputSubscription = new Subscription();
+
+  editModeForTasks: boolean[];
+  editTaskFormArray: FormArray = new FormArray([]);
 
   searchFormGroup: FormGroup = new FormGroup({ query: new FormControl('') });
   searchPattern: string = "";
@@ -69,6 +71,11 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.searchPattern = "";
       this.filteredTasks = this.tasks;
     }
+    this.resetEditModeForTasks();
+  }
+
+  private resetEditModeForTasks(): void {
+    this.editModeForTasks = new Array(this.filteredTasks.length).fill(false);
   }
 
   private extractListOfTasksCommonProperties(
@@ -81,15 +88,20 @@ export class NotebookComponent implements OnInit, AfterViewInit {
 
   promptForNewTask(): void {
     if (this.newTaskInputPromptExists()) { return; }
-    const newFormGroup = new FormGroup({
-      description: new FormControl(''),
-      date: new FormControl(''),
-      time: new FormControl(''),
-      place: new FormControl(''),
-      tag: new FormControl('')
-    });
+    const newFormGroup = this.createNewFormGroupForTask();
     this.newTaskFormArray.push(newFormGroup);
   } 
+
+  private createNewFormGroupForTask(task?: any): FormGroup {
+    task = task !== undefined ? task : '';
+    return new FormGroup({
+      description: new FormControl(task.description || ''),
+      date: new FormControl(task.date || ''),
+      time: new FormControl(task.time || ''),
+      place: new FormControl(task.place || ''),
+      tag: new FormControl(task.tag || '')
+    });
+  }
 
   private newTaskInputPromptExists(): boolean {
     return this.newTaskFormArray.length > 0;
@@ -172,6 +184,34 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       );
       this.tasks[doneTaskIndex].done = doneTask.done ;
     });
+  }
+  
+  toggleEditModeForTask(task: Task): void {
+    if (!this.isTaskInEditMode(task)) this.resetEditModeForTasks();
+    const taskIndex = this.findTaskIndex(task);
+    this.editModeForTasks[taskIndex] = !this.editModeForTasks[taskIndex];
+  }
+
+  private findTaskIndex(task: Task) {
+    return this.filteredTasks.findIndex(
+      taskToFind => taskToFind === task
+    );
+  }
+
+  isTaskInEditMode(task: Task): boolean {
+    const taskIndex = this.findTaskIndex(task);
+    return this.editModeForTasks[taskIndex];
+  }
+
+  editTask(task: Task): void {
+    this.toggleEditModeForTask(task);
+
+    if (this.isTaskInEditMode(task)) {
+      const editFormGroup = this.createNewFormGroupForTask(task);
+      this.editTaskFormArray.setControl(0, editFormGroup);
+    } else {
+      this.editTaskFormArray.clear();
+    }
   }
 
 }
