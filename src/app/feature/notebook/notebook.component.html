@@ -13,7 +13,7 @@
                 <input
                     type="search"
                     class="uk-search-input"
-                    placeholder="Buscar tareas"
+                    placeholder="Buscar tareas (por descripción, fecha o etiqueta)"
                     (input)="filterTasksByString(searchInput.value)"
                     #searchInput
                 >
@@ -67,7 +67,8 @@
                             enableTime: true,
                             noCalendar: true,
                             dateFormat: 'H:i',
-                            time_24hr: false
+                            time_24hr: false,
+                            allowInput: true
                         }"
                         placeholder="Hora"
                     >                        
