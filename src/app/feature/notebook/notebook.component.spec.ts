@@ -268,83 +268,84 @@ describe('NotebookComponent', () => {
       
       expect(editTaskForm).not.toBeNull();
       expect(taskItem).toBeNull();
-    });
+  });
 
-    it(`should leave the edit mode when the edit button is clicked while
-      editing a task`, () => {
-      const editTaskButton = debugElement.query(By.css('.edit-task-button'))
-        .nativeElement;
-      editTaskButton.click();
-      fixture.detectChanges();
-      editTaskButton.click();
-      fixture.detectChanges();
+  it(`should leave the edit mode when the edit button is clicked while
+    editing a task`, () => {
+    const editTaskButton = debugElement.query(By.css('.edit-task-button'))
+      .nativeElement;
+    editTaskButton.click();
+    fixture.detectChanges();
+    editTaskButton.click();
+    fixture.detectChanges();
 
-      const editTaskForm = debugElement.query(
-        By.css('.task-item > form.edit-task-form')
-      );
-      const taskItem = debugElement.query(By.css('.task-item > .task-field'));
-      
-      expect(editTaskForm).toBeNull();
-      expect(taskItem).not.toBeNull();
-    });
+    const editTaskForm = debugElement.query(
+      By.css('.task-item > form.edit-task-form')
+    );
+    const taskItem = debugElement.query(By.css('.task-item > .task-field'));
+    
+    expect(editTaskForm).toBeNull();
+    expect(taskItem).not.toBeNull();
+  });
 
-    it('should edit a task', () => {
-      const editTaskButton = debugElement.query(By.css('.edit-task-button'))
-        .nativeElement;
-      editTaskButton.click();
-      fixture.detectChanges();
+  it('should edit a task', () => {
+    const editTaskButton = debugElement.query(By.css('.edit-task-button'))
+      .nativeElement;
+    editTaskButton.click();
+    fixture.detectChanges();
 
-      const editTaskDescriptionInput = debugElement.query(
-        By.css('.task-item > form.edit-task-form input:first-of-type')
-      ).nativeElement;
-      editTaskDescriptionInput.value = 'editedDescription';
-      editTaskDescriptionInput.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+    const editTaskDescriptionInput = debugElement.query(
+      By.css('.task-item > form.edit-task-form input:first-of-type')
+    ).nativeElement;
+    editTaskDescriptionInput.value = 'editedDescription';
+    editTaskDescriptionInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
 
-      const saveEditedTaskButton = debugElement.query(
-        By.css('.save-edited-task')
-      ).nativeElement;
-      saveEditedTaskButton.click();
-      fixture.detectChanges();
+    const saveEditedTaskButton = debugElement.query(
+      By.css('.save-edited-task')
+    ).nativeElement;
+    saveEditedTaskButton.click();
+    fixture.detectChanges();
 
-      const editedTask = debugElement.query(
-        By.css('.task-list li:first-of-type')
-      );
+    const editedTask = debugElement.query(
+      By.css('.task-list li:first-of-type')
+    );
 
-      expect(editedTask.nativeElement.textContent)
-        .toContain('editedDescription');
-    });
+    expect(editedTask.nativeElement.textContent)
+      .toContain('editedDescription');
+  });
 
-    it('should not edit a task if its description is empty', () => {
-      const editTaskButton = debugElement.query(By.css('.edit-task-button'))
-        .nativeElement;
-      editTaskButton.click();
-      fixture.detectChanges();
+  it('should not edit a task if its description is empty', () => {
+    const editTaskButton = debugElement.query(By.css('.edit-task-button'))
+      .nativeElement;
+    editTaskButton.click();
+    fixture.detectChanges();
 
-      const editTaskDescriptionInput = debugElement.query(
-        By.css('.task-item > form.edit-task-form input:first-of-type')
-      ).nativeElement;
-      editTaskDescriptionInput.value = '        ';
-      editTaskDescriptionInput.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+    const editTaskDescriptionInput = debugElement.query(
+      By.css('.task-item > form.edit-task-form input:first-of-type')
+    ).nativeElement;
+    editTaskDescriptionInput.value = '        ';
+    editTaskDescriptionInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
 
-      const saveEditedTaskButton = debugElement.query(
-        By.css('.save-edited-task')
-      ).nativeElement;
-      saveEditedTaskButton.click();
-      fixture.detectChanges(); 
+    const saveEditedTaskButton = debugElement.query(
+      By.css('.save-edited-task')
+    ).nativeElement;
+    saveEditedTaskButton.click();
+    fixture.detectChanges(); 
 
-      const editTaskForm = debugElement.query(
-        By.css('.task-item > form.edit-task-form')
-      );
-      const taskItem = debugElement.query(By.css('.task-item > .task-field'));
-      
-      expect(editTaskForm).not.toBeNull();
-      expect(taskItem).toBeNull();
-    });
+    const editTaskForm = debugElement.query(
+      By.css('.task-item > form.edit-task-form')
+    );
+    const taskItem = debugElement.query(By.css('.task-item > .task-field'));
+    
+    expect(editTaskForm).not.toBeNull();
+    expect(taskItem).toBeNull();
+  });
 
-    it(`should show empty time and date input fields when editing a task that
-      doesn't have the time set`, fakeAsync(() => {
+  it(`should show empty time and date input fields when editing a task that
+    doesn't have the time set`, fakeAsync(
+      () => {
         taskStub.date = null;
         taskStub.time = null;
         component.filteredTasks = [taskStub];
@@ -362,7 +363,8 @@ describe('NotebookComponent', () => {
         );
         
         expect(editTimeInput.nativeElement.value).toBe('');
-      }));
+    })
+  );
 
 });
 

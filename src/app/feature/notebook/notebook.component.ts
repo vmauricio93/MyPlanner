@@ -51,6 +51,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.places = this.extractListOfTasksCommonProperties(tasks, 'place');
       this.tags = this.extractListOfTasksCommonProperties(tasks, 'tag');
       this.dates = this.extractListOfCommonDates(tasks);
+      this.sortDatesDescending(this.dates);
     });
   }
 
@@ -127,8 +128,11 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       .map(task => task.date)
       .filter((date, index, self) => index === self.findIndex(d => (
         d.getTime() === date.getTime()
-      )))
-      .sort((a, b) => b.getTime() - a.getTime());
+      )));
+  }
+
+  private sortDatesDescending(dates: Date[]): Date[] {
+    return dates.sort((a, b) => b.getTime() - a.getTime());
   }
 
   promptForNewTask(): void {
