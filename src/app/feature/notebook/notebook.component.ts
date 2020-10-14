@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { FlatpickrService } from 'src/app/core/flatpickr.service';
 import { FuseService } from 'src/app/core/fuse.service';
 import { TaskService } from 'src/app/core/task.service';
@@ -17,10 +18,16 @@ export class NotebookComponent implements OnInit, AfterViewInit {
   filteredTasks: Task[];
   places: string[];
   tags: string[];
+  dates: Date[];
   
   newTaskFormArray: FormArray = new FormArray([]);
   @ViewChildren('descriptionInput') descriptionInputRef: QueryList<any>;
   private descriptionInputSubscription = new Subscription();
+
+  @ViewChildren('editTaskDate') editDateInputRef: QueryList<any>;
+  private editDateInputSubscription = new Subscription();
+  @ViewChildren('editTaskTime') editTimeInputRef: QueryList<any>;
+  private editTimeInputSubscription = new Subscription();
 
   editModeForTasks: boolean[];
   editTaskFormArray: FormArray = new FormArray([]);
@@ -43,6 +50,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.filterTasksByString(this.searchPattern);
       this.places = this.extractListOfTasksCommonProperties(tasks, 'place');
       this.tags = this.extractListOfTasksCommonProperties(tasks, 'tag');
+      this.dates = this.extractListOfCommonDates(tasks);
     });
   }
 
@@ -55,10 +63,38 @@ export class NotebookComponent implements OnInit, AfterViewInit {
         }
       }
     );
+
+    this.editDateInputSubscription = this.editDateInputRef.changes.subscribe(
+      res => {
+        if (this.editDateInputRef.length > 0) {
+          setTimeout(() => {
+            const date = this.editDateInputRef.last.config.defaultDate;
+            this.editDateInputRef.last.flatpickr.setDate(date, true);
+          }, 100);
+        }
+      }
+    );
+
+    this.editTimeInputSubscription = this.editTimeInputRef.changes.subscribe(
+      res => {
+        if (this.editTimeInputRef.length > 0) {
+          setTimeout(() => {
+            const hour = this.editTimeInputRef.last.config.defaultHour;
+            const minutes = this.editTimeInputRef.last.config.defaultMinute;
+            if (hour === null || minutes === null) { return; }
+
+            const time = new Date().setHours(hour, minutes);
+            this.editTimeInputRef.last.flatpickr.setDate(time, true);
+          }, 100);
+        }
+      }
+    );
   }
 
   ngOnDestroy(): void {
     this.descriptionInputSubscription.unsubscribe();
+    this.editDateInputSubscription.unsubscribe();
+    this.editTimeInputSubscription.unsubscribe();
   }
 
   filterTasksByString(pattern: string): void {
@@ -86,6 +122,15 @@ export class NotebookComponent implements OnInit, AfterViewInit {
     )];
   }
 
+  private extractListOfCommonDates(tasks: Task[]): Date[] {
+    return tasks.filter(task => task.date)
+      .map(task => task.date)
+      .filter((date, index, self) => index === self.findIndex(d => (
+        d.getTime() === date.getTime()
+      )))
+      .sort((a, b) => b.getTime() - a.getTime());
+  }
+
   promptForNewTask(): void {
     if (this.newTaskInputPromptExists()) { return; }
     const newFormGroup = this.createNewFormGroupForTask();
@@ -108,8 +153,9 @@ export class NotebookComponent implements OnInit, AfterViewInit {
   }
 
   saveTask(newTask: Task): void {
-    if (this.isNewTaskEmpty(newTask)) { return; }
-    newTask = this.formatNewTask(newTask);
+    if (this.isTaskDescriptionEmpty(newTask)) { return; }
+    newTask = this.formatTaskDateAndTime(newTask);
+    newTask.done = false;
     this.taskService.postTask(newTask).subscribe(task => {
       this.tasks.unshift(task);
       this.filterTasksByString(this.searchPattern);
@@ -119,12 +165,11 @@ export class NotebookComponent implements OnInit, AfterViewInit {
     this.clearTaskChanges();
   }
 
-  private isNewTaskEmpty(newTask: Task): boolean {
-    return newTask.description.trim().length == 0;
+  private isTaskDescriptionEmpty(task: Task): boolean {
+    return task.description.trim().length == 0;
   }
 
-  private formatNewTask(task: Task): Task {
-    task.done = false;
+  private formatTaskDateAndTime(task: Task): Task {
     task.date = task.date[0];
     task.time = task.time[0];
     return task;
@@ -182,7 +227,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       const doneTaskIndex = this.tasks.findIndex(
         taskToToggle => taskToToggle === task
       );
-      this.tasks[doneTaskIndex].done = doneTask.done ;
+      this.tasks[doneTaskIndex].done = doneTask.done;
     });
   }
   
@@ -203,7 +248,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
     return this.editModeForTasks[taskIndex];
   }
 
-  editTask(task: Task): void {
+  setFormControlForTask(task: Task): void {
     this.toggleEditModeForTask(task);
 
     if (this.isTaskInEditMode(task)) {
@@ -212,6 +257,26 @@ export class NotebookComponent implements OnInit, AfterViewInit {
     } else {
       this.editTaskFormArray.clear();
     }
+  }
+
+  editTask(oldTask: Task, editedTask: Task): void {
+    if (this.isTaskDescriptionEmpty(editedTask)) { return; }
+    editedTask.id = oldTask.id;
+    editedTask.done = oldTask.done;
+    editedTask = this.formatTaskDateAndTime(editedTask);
+
+    this.taskService.editTask(editedTask).subscribe(editedTask => {
+      this.toggleEditModeForTask(oldTask);
+      this.editTaskFormArray.clear();
+
+      const taskIndex = this.findTaskIndex(oldTask);
+      this.filteredTasks[taskIndex] = editedTask;
+
+      this.places = this.extractListOfTasksCommonProperties(
+        this.tasks, 'place'
+      );
+      this.tags = this.extractListOfTasksCommonProperties(this.tasks, 'tag');
+    });
   }
 
 }

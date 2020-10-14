@@ -47,6 +47,14 @@ export class TaskService {
   }
 
   toggleTaskAsDone(task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.tasksEndpoint}/${task.id}`, task);
+    return this.http.put<Task>(
+      `${this.tasksEndpoint}/${task.id}?action=toggleAsDone`, task
+    );
+  }
+
+  editTask(task: Task): Observable<Task> {
+    return this.http.put<Task>(
+      `${this.tasksEndpoint}/${task.id}?action=edit`, task
+    ).pipe(map(task => this.formatTaskDateAndTime(task)));
   }
 }

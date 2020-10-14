@@ -66,7 +66,7 @@ describe('TaskService', () => {
     });
 
     const req = httpTestingController.expectOne(
-      `${tasksEndpoint}/${taskStub.id}`
+      `${tasksEndpoint}/${taskStub.id}?action=toggleAsDone`
     );
     expect(req.request.method).toEqual('PUT');
     taskStub.done = true;
@@ -94,6 +94,19 @@ describe('TaskService', () => {
         time: 68400,
         done: false
       }]);
+  });
+
+  it('should PUT an edited task in the server', () => {
+    const taskStub: Task = { id: 999, description: 'editedTask', done: false };
+    service.editTask(taskStub).subscribe(editedTask => {
+      expect(editedTask).toEqual(taskStub);
+    });
+
+    const req = httpTestingController.expectOne(
+      `${tasksEndpoint}/${taskStub.id}?action=edit`
+    );
+    expect(req.request.method).toEqual('PUT');
+    req.flush(taskStub);
   });
   
   afterEach(() => {

@@ -31,7 +31,10 @@
               "src/styles.scss",
               "node_modules/flatpickr/dist/flatpickr.min.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "ng2-flatpickr"
+            ]
           },
           "configurations": {
             "production": {
