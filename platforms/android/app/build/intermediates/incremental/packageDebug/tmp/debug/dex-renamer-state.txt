@@ -1,0 +1,4 @@
+#Thu Oct 15 08:22:55 COT 2020
+base.0=/home/mauro/Mis proyectos/MyPlanner/platforms/android/app/build/intermediates/dex/debug/out/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

@@ -1,11 +1,11 @@
 import { AfterViewInit, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { FlatpickrService } from '@src/app/core/flatpickr.service';
-import { FuseService } from '@src/app/core/fuse.service';
-import { TaskService } from '@src/app/core/task.service';
-import { UiKitService } from '@src/app/core/ui-kit.service';
-import { Task } from '@src/app/shared/task';
+import { FlatpickrService } from 'src/app/core/flatpickr.service';
+import { FuseService } from 'src/app/core/fuse.service';
+import { TaskService } from 'src/app/core/task.service';
+import { UiKitService } from 'src/app/core/ui-kit.service';
+import { Task } from 'src/app/shared/task';
 
 @Component({
   selector: 'app-notebook',
