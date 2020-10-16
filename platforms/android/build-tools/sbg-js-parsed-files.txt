@@ -1,3 +1,0 @@
-/home/mauro/Mis proyectos/MyPlanner/platforms/android/app/src/main/assets/app/vendor.js
-/home/mauro/Mis proyectos/MyPlanner/platforms/android/app/src/main/assets/app/runtime.js
-/home/mauro/Mis proyectos/MyPlanner/platforms/android/app/src/main/assets/app/bundle.js
