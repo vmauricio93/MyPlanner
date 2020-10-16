@@ -20,6 +20,14 @@
             </form>
             <div class="uk-flex uk-flex-center">
                 <button
+                    class="uk-button uk-button-default uk-button-small"
+                    (click)="filterByDate()"
+                >
+                    {{ isDateFilterActive ? 'Editar tareas' : 'Filtrar por fecha' }}
+                </button>
+            </div>
+            <div class="uk-flex uk-flex-center">
+                <button
                     class="uk-button uk-button-default"
                     (click)="promptForNewTask()"
                 >
@@ -110,14 +118,16 @@
                     type="button"
                     (click)="saveTask(control.value)"
                 >
-                    <span uk-icon="icon:  check"></span>
+                    <span uk-icon="icon:  check" uk-tooltip="Guardar tarea">
+                    </span>
                 </button>
                 <button
                     class="dismiss-new-task-button uk-button uk-button-default"
                     type="button"
                     (click)="clearTaskChanges()"
                 >
-                    <span uk-icon="icon:  close"></span>
+                    <span uk-icon="icon:  close" uk-tooltip="No hacer nada">
+                    </span>
                 </button>
             </div>
         </form>
@@ -126,7 +136,10 @@
 </div>
 <div class="uk-section uk-section-muted">
     <div class="uk-container">
-        <ul class="task-list uk-list uk-list-divider">
+        <ul
+            class="task-list uk-list uk-list-divider"
+            *ngIf="!isDateFilterActive"
+        >
             <li
                 *ngFor="let task of filteredTasks"
                 class="task-item uk-child-width-expand@s uk-text-center"
@@ -134,7 +147,7 @@
             >
                 <div
                     class="task-field task-description"
-                    [ngClass]="{'task-done': task.done}"
+                    [ngClass]="{ 'task-done': task.done }"
                     (click)="toggleTaskAsDone(task)"
                     *ngIf="!isTaskInEditMode(task)"
                 >{{ task.description }}</div>
@@ -251,22 +264,77 @@
                         class="edit-task-button uk-button uk-button-text"
                         (click)="setFormControlForTask(task)"
                     >
-                        <span uk-icon="icon: pencil"></span>
+                        <span
+                            uk-icon="icon: pencil"
+                            uk-tooltip="Editar tarea"
+                        >
+                        </span>
                     </button>
                     <button
                         class="uk-button uk-button-text"
                         (click)="showDeleteModalForTask(task)"
                     >
-                        <span uk-icon="icon:  trash"></span>
+                        <span
+                            uk-icon="icon:  trash"
+                            uk-tooltip="Eliminar tarea"
+                        >
+                        </span>
                     </button>
                 </div>
             </li>
-            <!-- <li *ngFor="let date of dates">
-                <div>{{ date | date:'fullDate' }}</div>
+        </ul>
+        <ul
+            class="task-list-by-date uk-list divider"
+            *ngIf="isDateFilterActive"
+        >
+            <li *ngFor="let date of dates">
+                <h4>{{ date | date:'fullDate' }}</h4>
                 <div *ngFor="let task of filteredTasks | filterByDate: date">
-                    <div>{{ task.description }}</div>
+                    <span
+                        class="task-description"
+                        [ngClass]="{ 'task-done': task.done }"
+                        (click)="toggleTaskAsDone(task)"
+                    >
+                        {{ task.description }}
+                    </span>
+                    <span *ngIf="task.time">
+                        a las {{ task.time | date: 'shortTime' }}
+                    </span>
+                    <span *ngIf="task.place">
+                        en {{ task.place }}
+                    </span>
+                    <span *ngIf="task.tag">( Categoría: 
+                        <span
+                            [ngClass]="{'uk-badge': task.tag }"
+                        > {{ task.tag }}</span>
+                        )
+                    </span> 
                 </div>
-            </li> -->
+            </li>
+            <li>
+                <h4>Tareas sin fecha</h4>
+                <div *ngFor="let taskWithoutDate of filteredTasks | filterByNoDate">
+                    <span
+                        class="task-description"
+                        [ngClass]="{ 'task-done': taskWithoutDate.done }"
+                        (click)="toggleTaskAsDone(taskWithoutDate)"
+                    >
+                        {{ taskWithoutDate.description }}
+                    </span>
+                    <span *ngIf="taskWithoutDate.time">
+                        a las {{ taskWithoutDate.time | date: 'shortTime' }}
+                    </span>
+                    <span *ngIf="taskWithoutDate.place">
+                        en {{ taskWithoutDate.place }}
+                    </span>
+                    <span *ngIf="taskWithoutDate.tag">( Categoría: 
+                        <span
+                            [ngClass]="{'uk-badge': taskWithoutDate.tag }"
+                        > {{ taskWithoutDate.tag }}</span>
+                        )
+                    </span>       
+                </div>
+            </li>
         </ul>
     </div>
 </div>

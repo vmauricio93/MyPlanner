@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
 import { FlatpickrService } from '@src/app/core/flatpickr.service';
 import { FuseService } from '@src/app/core/fuse.service';
 import { TaskService } from '@src/app/core/task.service';
@@ -34,6 +33,8 @@ export class NotebookComponent implements OnInit, AfterViewInit {
 
   searchFormGroup: FormGroup = new FormGroup({ query: new FormControl('') });
   searchPattern: string = "";
+
+  isDateFilterActive: boolean = false;
 
   constructor(
     private taskService: TaskService,
@@ -165,6 +166,8 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.filterTasksByString(this.searchPattern);
       this.addTaskPropertyToSuggestions(task, 'place', this.places);
       this.addTaskPropertyToSuggestions(task, 'tag', this.tags);
+      this.dates = this.extractListOfCommonDates(this.tasks);
+      this.sortDatesDescending(this.dates);
     });
     this.clearTaskChanges();
   }
@@ -205,6 +208,8 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.filterTasksByString(this.searchPattern);
       this.removeTaskPropertyFromSuggestions(task, 'place', this.places);
       this.removeTaskPropertyFromSuggestions(task, 'tag', this.tags);
+      this.dates = this.extractListOfCommonDates(this.tasks);
+      this.sortDatesDescending(this.dates);
     });
   }
 
@@ -280,7 +285,13 @@ export class NotebookComponent implements OnInit, AfterViewInit {
         this.tasks, 'place'
       );
       this.tags = this.extractListOfTasksCommonProperties(this.tasks, 'tag');
+      this.dates = this.extractListOfCommonDates(this.tasks);
+      this.sortDatesDescending(this.dates);
     });
+  }
+
+  filterByDate(): void {
+    this.isDateFilterActive = !this.isDateFilterActive;
   }
 
 }
