@@ -177,8 +177,8 @@ export class NotebookComponent implements OnInit, AfterViewInit {
   }
 
   private formatTaskDateAndTime(task: Task): Task {
-    task.date = task.date[0];
-    task.time = task.time[0];
+    task.date = Array.isArray(task.date) ? task.date[0] : task.date;
+    task.time = Array.isArray(task.time) ? task.time[0] : task.time;
     return task;
   }
 
@@ -290,7 +290,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
     });
   }
 
-  filterByDate(): void {
+  filterTasksByDate(): void {
     this.isDateFilterActive = !this.isDateFilterActive;
   }
 

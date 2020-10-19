@@ -1,7 +1,11 @@
-import { DebugElement } from '@angular/core';
+import { DebugElement, LOCALE_ID } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import localeEs from "@angular/common/locales/es";
+import { registerLocaleData } from '@angular/common';
+registerLocaleData(localeEs);
+
 import { Ng2FlatpickrModule } from 'ng2-flatpickr';
 import { of } from 'rxjs';
 import { FuseService } from 'src/app/core/fuse.service';
@@ -26,7 +30,8 @@ describe('NotebookComponent', () => {
       providers: [
         { provide: TaskService, useClass: TaskServiceMock },
         { provide: UiKitService, useClass: UiKitServiceMock },
-        { provide: FuseService, useClass: FuseServiceMock }
+        { provide: FuseService, useClass: FuseServiceMock },
+        { provide: LOCALE_ID, useValue: 'es-CO' }
       ]
     })
     .compileComponents();
@@ -75,7 +80,7 @@ describe('NotebookComponent', () => {
 
   it('should show the time for a task in the list', () => {
     const time = new Date().toLocaleTimeString(
-      [], { hour: '2-digit', minute: '2-digit' }
+      'es-CO', { hour: '2-digit', minute: '2-digit' }
     );
     expect(firstTask.nativeElement.textContent).toContain(time);
   });
@@ -133,6 +138,22 @@ describe('NotebookComponent', () => {
 
     expect(newTaskListItem).toBeNull();  
   });
+
+  it('should convert the task date and time from array to date when needed', 
+    () => {
+      const secondTaskStub: any = { ...taskStub };
+      secondTaskStub.date = [taskStub.date];
+      secondTaskStub.time = [taskStub.time];
+      component.saveTask(secondTaskStub);
+
+      expect(component.tasks[1].date.getTime()).toEqual(
+        taskStub.date.getTime()
+      );
+      expect(component.tasks[1].time.getTime()).toEqual(
+        taskStub.time.getTime()
+      );
+    }
+  );
 
   it('should delete a task', () => {
     component.tasks = [taskStub];
@@ -365,6 +386,44 @@ describe('NotebookComponent', () => {
         expect(editTimeInput.nativeElement.value).toBe('');
     })
   );
+
+  it(`should show the task list filtered by date and hide the editable task 
+    list`, () => {
+      component.filterTasksByDate();
+      fixture.detectChanges();
+
+      const taskListByDate = debugElement.query(By.css('ul.task-list-by-date'));
+      const editableTaskList = debugElement.query(By.css('.task-list'));
+      expect(taskListByDate).not.toBeNull();
+      expect(editableTaskList).toBeNull();
+    }
+  );
+
+  it('should show a date heading and the detailed tasks when filtered by date',
+   () => {
+    component.filterTasksByDate();
+    fixture.detectChanges();
+
+    const dateHeading = debugElement.query(By.css('.date-heading'));
+    const localeDate = new Date().toLocaleDateString(
+      'es-CO',
+      { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    );
+
+    expect(dateHeading.nativeElement.textContent).toContain(localeDate);
+
+    }
+  );
+
+  it('should sort the tasks in descending order when filtering by date', () => {
+    const secondTaskStub: Task = { ...taskStub };
+    secondTaskStub.date = new Date();
+    secondTaskStub.date.setFullYear(secondTaskStub.date.getFullYear() + 1);
+    component.saveTask(secondTaskStub);
+
+    expect(component.dates[0].getTime())
+      .toBeGreaterThan(component.dates[1].getTime());
+  });
 
 });
 

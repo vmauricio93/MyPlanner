@@ -21,7 +21,7 @@
             <div class="uk-flex uk-flex-center">
                 <button
                     class="uk-button uk-button-default uk-button-small"
-                    (click)="filterByDate()"
+                    (click)="filterTasksByDate()"
                 >
                     {{ isDateFilterActive ? 'Editar tareas' : 'Filtrar por fecha' }}
                 </button>
@@ -155,7 +155,7 @@
                     {{ task.date | date: "dd/MM/yy" }}
                 </div>
                 <div *ngIf="!isTaskInEditMode(task)" class="task-field">
-                    {{ task.time | date: "shortTime" }}
+                    {{ task.time | date: "h:mm a" }}
                 </div>
                 <div *ngIf="!isTaskInEditMode(task)" class="task-field">
                     {{ task.place }}
@@ -284,11 +284,12 @@
             </li>
         </ul>
         <ul
-            class="task-list-by-date uk-list divider"
+            class="task-list-by-date uk-list uk-list-collapse uk-child-width-1-2@s uk-text-center"
             *ngIf="isDateFilterActive"
+            uk-grid
         >
             <li *ngFor="let date of dates">
-                <h4>{{ date | date:'fullDate' }}</h4>
+                <h4 class="date-heading">{{ date | date:'fullDate' }}</h4>
                 <div *ngFor="let task of filteredTasks | filterByDate: date">
                     <span
                         class="task-description"
@@ -298,7 +299,7 @@
                         {{ task.description }}
                     </span>
                     <span *ngIf="task.time">
-                        a las {{ task.time | date: 'shortTime' }}
+                        a las {{ task.time | date: 'h:mm a' }}
                     </span>
                     <span *ngIf="task.place">
                         en {{ task.place }}
@@ -322,7 +323,7 @@
                         {{ taskWithoutDate.description }}
                     </span>
                     <span *ngIf="taskWithoutDate.time">
-                        a las {{ taskWithoutDate.time | date: 'shortTime' }}
+                        a las {{ taskWithoutDate.time | date: 'h:mm a' }}
                     </span>
                     <span *ngIf="taskWithoutDate.place">
                         en {{ taskWithoutDate.place }}
