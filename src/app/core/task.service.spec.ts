@@ -4,6 +4,7 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { TaskService } from './task.service';
 import { HttpResponse } from '@angular/common/http';
 import { Task } from '../shared/task';
+import { environment } from 'src/environments/environment';
 
 describe('TaskService', () => {
   let service: TaskService;
@@ -16,7 +17,7 @@ describe('TaskService', () => {
     });
     service = TestBed.inject(TaskService);
     httpTestingController = TestBed.inject(HttpTestingController);
-    tasksEndpoint = 'http://localhost:8080/api/v1/tasks';
+    tasksEndpoint = `${environment.apiUrl}/tasks`;
   });
 
   it('should be created', () => {
@@ -76,10 +77,8 @@ describe('TaskService', () => {
   it('should format the date and time of a task', () => {
     const taskStub: Task = {
       description: 'taskStub',
-      // toString() to mimic the Date constructor parsing when passing an
-      // array to it
-      date: new Date([2020, 1, 1].toString()),
-      time: new Date(1970, 0, 1, 14, 0),
+      date: new Date('2020-01-01T05:00:00.000Z'),
+      time: new Date('1970-01-01T14:00:00-05:00'),
       done: false
     };
     service.getTasks().subscribe(tasks => {
@@ -90,8 +89,8 @@ describe('TaskService', () => {
     expect(req.request.method).toEqual('GET');
     req.flush([{
         description: 'taskStub',
-        date: [2020, 1, 1],
-        time: 68400,
+        date: '2020-01-01',
+        time: '1970-01-01T14:00:00-05:00',
         done: false
       }]);
   });

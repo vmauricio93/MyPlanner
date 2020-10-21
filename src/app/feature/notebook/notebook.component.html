@@ -1,12 +1,11 @@
 <div
     class="uk-section uk-section-small uk-section-primary"
-    uk-sticky="animation: uk-animation-slide-top"
     id="headerSection"
 >  
     <div class="uk-container">
-        <div class="uk-child-width-expand@s" uk-grid>
+        <div class="uk-flex uk-flex-around" uk-grid>
             <form
-                class="uk-search uk-search-default"
+                class="uk-search uk-search-default uk-width-2-4@m"
                 [formGroup]="searchFormGroup"
             >
                 <span class="uk-search-icon-flip" uk-search-icon></span>
@@ -20,18 +19,25 @@
             </form>
             <div class="uk-flex uk-flex-center">
                 <button
-                    class="uk-button uk-button-default uk-button-small"
+                    class="uk-button uk-button-default"
                     (click)="filterTasksByDate()"
+                    [ngClass]="isDateFilterActive ? 'date-filter-button-edit-text' : 'date-filter-button-filter-text'"
                 >
-                    {{ isDateFilterActive ? 'Editar tareas' : 'Filtrar por fecha' }}
+                    <span
+                        *ngIf="isDateFilterActive; else dateFilterInactive"
+                        uk-icon="icon: pencil">
+                    </span>
+                    <ng-template #dateFilterInactive>
+                        <span uk-icon="icon: calendar"></span>
+                    </ng-template>
                 </button>
             </div>
             <div class="uk-flex uk-flex-center">
                 <button
-                    class="uk-button uk-button-default"
+                    class="add-task-button uk-button uk-button-default"
                     (click)="promptForNewTask()"
                 >
-                    Añadir tarea
+                    <span uk-icon="icon: plus"></span>
                 </button>
             </div>
         </div>
@@ -162,7 +168,7 @@
                 </div>
                 <div *ngIf="!isTaskInEditMode(task)" class="task-field">
                     <span
-                        [ngClass]="{'uk-badge': task.tag }"
+                        [ngClass]="{'uk-badge': task.tag}"
                     > {{ task.tag }}</span>
                 </div>
                 <form

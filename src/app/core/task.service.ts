@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from "rxjs/operators";
+import { environment } from 'src/environments/environment';
 import { Task } from '../shared/task';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-  tasksEndpoint = 'http://localhost:8080/api/v1/tasks';
+  tasksEndpoint = `${environment.apiUrl}/tasks`;
   
   constructor(private http: HttpClient) { }
   
@@ -26,13 +27,12 @@ export class TaskService {
   }
 
   private formatTaskDateAndTime(task: Task): Task {
-    // The server returns the date as an array of year, month and day
-    if (task.date && Array.isArray(task.date)) {
-      task.date = new Date(task.date);
+    if (task.date) {
+    // The server returns the date as a string without a timezone
+      task.date = new Date(task.date + 'T05:00:00.000Z');
     }
-    // The server returns the time as a number (timestamp)
-    if (task.time && Number.isInteger(task.time)) {
-      task.time = new Date(task.time as any * 1000);
+    if (task.time) {
+      task.time = new Date(task.time);
     }
     return task;
   }
