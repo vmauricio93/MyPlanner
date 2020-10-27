@@ -36,6 +36,8 @@ export class NotebookComponent implements OnInit, AfterViewInit {
 
   isDateFilterActive: boolean = false;
 
+  taskDetailsVisibilityForTasks: boolean[];
+
   constructor(
     private taskService: TaskService,
     private uiKit: UiKitService,
@@ -44,7 +46,6 @@ export class NotebookComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {    
-    this.uiKit.useUIkitIcons();
     this.flatpickr.localizeSpanish();
     this.taskService.getTasks().subscribe(tasks => {
       this.tasks = tasks;
@@ -53,6 +54,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.tags = this.extractListOfTasksCommonProperties(tasks, 'tag');
       this.dates = this.extractListOfCommonDates(tasks);
       this.sortDatesDescending(this.dates);
+      this.hideTasksDetails();
     });
   }
 
@@ -110,6 +112,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.filteredTasks = this.tasks;
     }
     this.resetEditModeForTasks();
+    this.hideTasksDetails();
   }
 
   private resetEditModeForTasks(): void {
@@ -134,6 +137,11 @@ export class NotebookComponent implements OnInit, AfterViewInit {
 
   private sortDatesDescending(dates: Date[]): Date[] {
     return dates.sort((a, b) => b.getTime() - a.getTime());
+  }
+
+  private hideTasksDetails(): void {
+    this.taskDetailsVisibilityForTasks = new Array(this.filteredTasks.length)
+      .fill(false);
   }
 
   promptForNewTask(): void {
@@ -168,6 +176,10 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.addTaskPropertyToSuggestions(task, 'tag', this.tags);
       this.dates = this.extractListOfCommonDates(this.tasks);
       this.sortDatesDescending(this.dates);
+      this.uiKit.createNotification({
+        message: 'Tarea añadida con éxito',
+        status: 'primary'
+      });
     });
     this.clearTaskChanges();
   }
@@ -210,6 +222,7 @@ export class NotebookComponent implements OnInit, AfterViewInit {
       this.removeTaskPropertyFromSuggestions(task, 'tag', this.tags);
       this.dates = this.extractListOfCommonDates(this.tasks);
       this.sortDatesDescending(this.dates);
+      this.uiKit.createNotification({ message: 'Tarea eliminada' });
     });
   }
 
@@ -274,12 +287,12 @@ export class NotebookComponent implements OnInit, AfterViewInit {
     editedTask.done = oldTask.done;
     editedTask = this.formatTaskDateAndTime(editedTask);
 
-    this.taskService.editTask(editedTask).subscribe(editedTask => {
+    this.taskService.editTask(editedTask).subscribe(task => {
       this.toggleEditModeForTask(oldTask);
       this.editTaskFormArray.clear();
 
       const taskIndex = this.findTaskIndex(oldTask);
-      this.filteredTasks[taskIndex] = editedTask;
+      this.filteredTasks[taskIndex] = task;
 
       this.places = this.extractListOfTasksCommonProperties(
         this.tasks, 'place'
@@ -292,6 +305,17 @@ export class NotebookComponent implements OnInit, AfterViewInit {
 
   filterTasksByDate(): void {
     this.isDateFilterActive = !this.isDateFilterActive;
+  }
+
+  isTaskDetailsVisible(task: Task): boolean {
+    const taskIndex = this.findTaskIndex(task);
+    return this.taskDetailsVisibilityForTasks[taskIndex];
+  }
+
+  toggleDetailsVisibilityForTask(task: Task): void {
+    const taskIndex = this.findTaskIndex(task);
+    this.taskDetailsVisibilityForTasks[taskIndex] = 
+      !this.taskDetailsVisibilityForTasks[taskIndex];
   }
 
 }

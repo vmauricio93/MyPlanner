@@ -15,6 +15,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { Task } from 'src/app/shared/task';
 
 import { NotebookComponent } from './notebook.component';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('NotebookComponent', () => {
   let component: NotebookComponent;
@@ -26,7 +27,12 @@ describe('NotebookComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ NotebookComponent ],
-      imports: [ SharedModule, ReactiveFormsModule, Ng2FlatpickrModule ],
+      imports: [
+        RouterTestingModule,
+        SharedModule,
+        ReactiveFormsModule,
+        Ng2FlatpickrModule
+      ],
       providers: [
         { provide: TaskService, useClass: TaskServiceMock },
         { provide: UiKitService, useClass: UiKitServiceMock },
@@ -425,6 +431,12 @@ describe('NotebookComponent', () => {
       .toBeGreaterThan(component.dates[1].getTime());
   });
 
+  it('should toggle the visibility of details for a task', () => {
+    component.filteredTasks = [taskStub];
+    component.toggleDetailsVisibilityForTask(taskStub);
+    expect(component.taskDetailsVisibilityForTasks[0]).toBeTrue();
+  });
+
 });
 
 class TaskServiceMock {
@@ -448,6 +460,7 @@ class TaskServiceMock {
 class UiKitServiceMock {
   useUIkitIcons = () => {};
   createConfirmationModal = (message: string) => {};
+  createNotification = (options: any) => {};
 }
 
 class FuseServiceMock {

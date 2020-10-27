@@ -23,14 +23,33 @@ describe('FuseService', () => {
       { description: 'anotherTask', tag:'ABCd', done: false }
     ];
 
-    const actual = service.searchFromList(
+    const searchResult = service.searchFromList(
       'abc', objectArray, ['description', 'place', 'tag']
     );
-    const expected = [
+
+    const filteredArray = [
       { description: 'taskOne', place: 'abc', done: true },
       { description: 'defgabc', done: true },
       { description: 'anotherTask', tag:'ABCd', done: false }
     ];
-    expect(actual).toEqual(expected);
+    expect(searchResult).toEqual(filteredArray);
+  });
+
+  it('should search from strings, ignoring diacritics', () => {
+    const objectArray = [
+      { description: 'tílde' },
+      { description: 'nodiacritics' },
+      { description: 'NO_TILDE' }
+    ];
+
+    const searchResult = service.searchFromList(
+      'tilde', objectArray, ['description']
+    );
+
+    const filteredArray = [
+      { description: 'tílde' },
+      { description: 'NO_TILDE' }
+    ];
+    expect(searchResult).toEqual(filteredArray);
   });
 });

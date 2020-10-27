@@ -18,4 +18,9 @@ export class UiKitService {
   createConfirmationModal(message: string): Promise<void> {
     return UIkit.modal.confirm(message);
   }
+
+  createNotification(options: UIkit.UIkitNotificationOptions):
+  UIkit.UIkitNotificationElement {
+    return UIkit.notification(options);
+  }
 }

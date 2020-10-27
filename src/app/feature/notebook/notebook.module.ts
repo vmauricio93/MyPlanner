@@ -14,6 +14,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
     SharedModule,
     ReactiveFormsModule,
     Ng2FlatpickrModule
-  ]
+  ],
+  exports: [NotebookComponent]
 })
 export class NotebookModule { }

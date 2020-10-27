@@ -1,3 +1,4 @@
+<app-navbar></app-navbar>
 <div
     class="uk-section uk-section-small uk-section-primary"
     id="headerSection"
@@ -25,10 +26,15 @@
                 >
                     <span
                         *ngIf="isDateFilterActive; else dateFilterInactive"
-                        uk-icon="icon: pencil">
+                        uk-icon="icon: pencil"
+                        uk-tooltip="Editar tareas"
+                    >
                     </span>
                     <ng-template #dateFilterInactive>
-                        <span uk-icon="icon: calendar"></span>
+                        <span
+                            uk-icon="icon: calendar"
+                            uk-tooltip="Filtrar por fecha"
+                        ></span>
                     </ng-template>
                 </button>
             </div>
@@ -37,7 +43,8 @@
                     class="add-task-button uk-button uk-button-default"
                     (click)="promptForNewTask()"
                 >
-                    <span uk-icon="icon: plus"></span>
+                    <span uk-icon="icon: plus" uk-tooltip="Añadir tareas">
+                    </span>
                 </button>
             </div>
         </div>
@@ -157,16 +164,32 @@
                     (click)="toggleTaskAsDone(task)"
                     *ngIf="!isTaskInEditMode(task)"
                 >{{ task.description }}</div>
-                <div *ngIf="!isTaskInEditMode(task)" class="task-field">
+                <div
+                    *ngIf="!isTaskInEditMode(task)"
+                    class="task-field"
+                    [ngClass]="{ 'uk-visible@s': !isTaskDetailsVisible(task) }"
+                >
                     {{ task.date | date: "dd/MM/yy" }}
                 </div>
-                <div *ngIf="!isTaskInEditMode(task)" class="task-field">
+                <div
+                    *ngIf="!isTaskInEditMode(task)"
+                    class="task-field"
+                    [ngClass]="{ 'uk-visible@s': !isTaskDetailsVisible(task) }"
+                >
                     {{ task.time | date: "h:mm a" }}
                 </div>
-                <div *ngIf="!isTaskInEditMode(task)" class="task-field">
+                <div
+                    *ngIf="!isTaskInEditMode(task)"
+                    class="task-field"
+                    [ngClass]="{ 'uk-visible@s': !isTaskDetailsVisible(task) }"
+                >
                     {{ task.place }}
                 </div>
-                <div *ngIf="!isTaskInEditMode(task)" class="task-field">
+                <div
+                    *ngIf="!isTaskInEditMode(task)"
+                    class="task-field"
+                    [ngClass]="{ 'uk-visible@s': !isTaskDetailsVisible(task) }"
+                >
                     <span
                         [ngClass]="{'uk-badge': task.tag}"
                     > {{ task.tag }}</span>
@@ -283,6 +306,16 @@
                         <span
                             uk-icon="icon:  trash"
                             uk-tooltip="Eliminar tarea"
+                        >
+                        </span>
+                    </button>
+                    <button
+                        class="uk-button uk-button-text uk-hidden@s"
+                        (click)="toggleDetailsVisibilityForTask(task)"
+                    >
+                        <span
+                            uk-icon="icon:  info"
+                            uk-tooltip="Ver más información"
                         >
                         </span>
                     </button>

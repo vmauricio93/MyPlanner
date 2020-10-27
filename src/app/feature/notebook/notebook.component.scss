@@ -6,16 +6,29 @@
     text-decoration: line-through;
 }
 
-@media (min-width: 640px) {
-    .date-filter-button-edit-text::after {
-        content: "Editar tareas";
-    }
-    
-    .date-filter-button-filter-text::after {
-        content: "Filtrar por fecha";
+.date-filter-button-edit-text::after {
+    content: "Editar tareas";
+}
+
+.date-filter-button-filter-text::after {
+    content: "Filtrar por fecha";
+}
+
+.add-task-button::after {
+    content: "Añadir tarea";
+}
+
+@media (max-width: 640px) {
+    .date-filter-button-edit-text:hover::after,
+    .date-filter-button-filter-text:hover::after,
+    .add-task-button:hover::after {
+        display: inherit;
     }
 
+    .date-filter-button-edit-text::after,
+    .date-filter-button-filter-text::after,
     .add-task-button::after {
-        content: "Añadir tarea";
+        display: none;
     }
+
 }

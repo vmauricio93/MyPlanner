@@ -28,4 +28,11 @@ describe('UiKitService', () => {
     service.createConfirmationModal('message');
     expect(UIkit.modal.confirm).toHaveBeenCalledWith('message');
   });
+
+  it('should create a notification', () => {
+    spyOn(UIkit, 'notification');
+    service.createNotification({ message: 'message' });
+    expect(UIkit.notification)
+      .toHaveBeenCalledWith({ message: 'message' } as any);
+  });
 });
